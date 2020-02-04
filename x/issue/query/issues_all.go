@@ -3,7 +3,8 @@ package query
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/konstellation/konstellation/x/issue/keeper"
+
+	"github.com/konstellation/kn-sdk/x/issue/keeper"
 )
 
 func IssuesAll(ctx sdk.Context, k keeper.Keeper) ([]byte, sdk.Error) {

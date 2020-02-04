@@ -1,13 +1,15 @@
 package tx
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	"github.com/konstellation/konstellation/x/issue/types"
-	"github.com/spf13/cobra"
+
+	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
 // getTxCmdTransfer implements transfer function

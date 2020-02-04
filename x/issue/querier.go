@@ -1,11 +1,13 @@
 package issue
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/konstellation/konstellation/x/issue/keeper"
-	"github.com/konstellation/konstellation/x/issue/query"
-	"github.com/konstellation/konstellation/x/issue/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/konstellation/kn-sdk/x/issue/keeper"
+	"github.com/konstellation/kn-sdk/x/issue/query"
+	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
 // NewQuerier creates a querier for auth REST endpoints

@@ -1,9 +1,10 @@
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cast"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // querier keys

@@ -1,12 +1,14 @@
 package tx
 
 import (
+	"net/http"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	"github.com/konstellation/konstellation/x/issue/types"
-	"net/http"
+
+	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
 type (

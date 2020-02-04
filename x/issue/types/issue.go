@@ -2,10 +2,11 @@ package types
 
 import (
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/mitchellh/mapstructure"
 	"math/big"
 	"strings"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/mitchellh/mapstructure"
 )
 
 var (

@@ -2,10 +2,12 @@ package query
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/konstellation/konstellation/x/issue/types"
-	"net/http"
+
+	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
 func pathQueryIssuesAll() string {

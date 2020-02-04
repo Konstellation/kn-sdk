@@ -7,7 +7,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/params/subspace"
-	"github.com/konstellation/konstellation/x/issue/types"
+
+	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
 // IssueKeeper encodes/decodes accounts using the go-amino (binary)

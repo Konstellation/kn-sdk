@@ -2,19 +2,21 @@ package issue
 
 import (
 	"encoding/json"
-	"github.com/konstellation/konstellation/x/issue/keeper"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
+
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/konstellation/konstellation/x/issue/client/cli"
-	"github.com/konstellation/konstellation/x/issue/client/rest"
-	"github.com/konstellation/konstellation/x/issue/types"
+
+	"github.com/konstellation/kn-sdk/x/issue/client/cli"
+	"github.com/konstellation/kn-sdk/x/issue/client/rest"
+	"github.com/konstellation/kn-sdk/x/issue/keeper"
+	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
 var (

@@ -1,9 +1,11 @@
 package cli
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/konstellation/konstellation/x/issue/client/cli/tx"
 	"github.com/spf13/cobra"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+
+	"github.com/konstellation/kn-sdk/x/issue/client/cli/tx"
 )
 
 // GetTxCmd returns the transaction commands for this module

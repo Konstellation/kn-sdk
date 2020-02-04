@@ -2,11 +2,14 @@ package query
 
 import (
 	"fmt"
+
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/konstellation/konstellation/x/issue/types"
-	"github.com/spf13/cobra"
+
+	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
 func pathQueryIssueAllowance(owner sdk.AccAddress, spender sdk.AccAddress, denom string) string {

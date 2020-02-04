@@ -1,8 +1,9 @@
 package tx
 
 import (
-	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/gorilla/mux"
+
+	"github.com/cosmos/cosmos-sdk/client/context"
 )
 
 // RegisterTxRoutes registers all transaction routes on the provided router.

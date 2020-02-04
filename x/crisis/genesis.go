@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 
-	"github.com/konstellation/konstellation/types"
+	"github.com/konstellation/kn-sdk/types"
 )
 
 const (

@@ -2,9 +2,11 @@ package issue
 
 import (
 	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/konstellation/konstellation/x/issue/handler"
-	"github.com/konstellation/konstellation/x/issue/types"
+
+	"github.com/konstellation/kn-sdk/x/issue/handler"
+	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {
