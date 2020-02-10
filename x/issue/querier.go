@@ -22,6 +22,8 @@ func NewQuerier(k keeper.Keeper) sdk.Querier {
 			return query.IssuesAll(ctx, k)
 		case types.QueryAllowance:
 			return query.Allowance(ctx, k, path[1], path[2], path[3])
+		case types.QueryAllowances:
+			return query.Allowances(ctx, k, path[1], path[2])
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown auth query endpoint")
 		}

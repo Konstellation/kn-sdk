@@ -281,7 +281,7 @@ func (k *Keeper) getIssues(ctx sdk.Context, denoms []string) types.CoinIssues {
 	issues := make(types.CoinIssues, 0, length)
 
 	for _, v := range denoms {
-		issues = append(issues, *k.getIssue(ctx, v))
+		issues = append(issues, k.getIssue(ctx, v))
 	}
 
 	return issues
@@ -327,7 +327,7 @@ func (k *Keeper) ListAll(ctx sdk.Context) types.CoinIssues {
 	return k.getIssues(ctx, denoms)
 }
 
-func (k *Keeper) List(ctx sdk.Context, params types.IssuesParams) []types.CoinIssue {
+func (k *Keeper) List(ctx sdk.Context, params types.IssuesParams) types.CoinIssues {
 	if params.Owner != "" {
 		return k.getIssuesByAddress(ctx, params.Owner)
 	}
@@ -355,22 +355,37 @@ func (k *Keeper) List(ctx sdk.Context, params types.IssuesParams) []types.CoinIs
 
 // ----------------------- allowance -----------------------
 
-func (k *Keeper) allowance(ctx sdk.Context, owner sdk.AccAddress, spender sdk.AccAddress, issueID string) sdk.Coin {
+func (k *Keeper) allowance(ctx sdk.Context, owner, spender sdk.AccAddress, denom string) sdk.Coin {
 	store := ctx.KVStore(k.key)
-	bz := store.Get(KeyAllowance(issueID, owner, spender))
+	bz := store.Get(KeyAllowance(denom, owner, spender))
 	if bz == nil {
-		return sdk.NewCoin(issueID, sdk.ZeroInt())
+		return sdk.NewCoin(denom, sdk.ZeroInt())
 	}
 
 	var amount sdk.Int
 	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &amount)
-	return sdk.NewCoin(issueID, amount)
+	return sdk.NewCoin(denom, amount)
+}
+
+func (k *Keeper) allowances(ctx sdk.Context, owner sdk.AccAddress, denom string) sdk.Coin {
+	store := ctx.KVStore(k.key)
+	bz := store.Get(KeyAllowances(denom, owner))
+	if bz == nil {
+		return sdk.NewCoin(denom, sdk.ZeroInt())
+		//return sdk.NewCoins(sdk.NewCoin(denom, sdk.ZeroInt()))
+	}
+
+	var amount sdk.Int
+	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &amount)
+	return sdk.NewCoin(denom, amount)
 }
 
 func (k *Keeper) approve(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
 	store := ctx.KVStore(k.key)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(amount.Amount)
 	store.Set(KeyAllowance(amount.Denom, owner, spender), bz)
+	bz = k.cdc.MustMarshalBinaryLengthPrefixed(types.NewAllowance(amount, spender))
+	store.Set(KeyAllowances(amount.Denom, owner), bz)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
@@ -568,6 +583,10 @@ func (k *Keeper) Approve(ctx sdk.Context, owner, spender sdk.AccAddress, coins s
 
 func (k *Keeper) Allowance(ctx sdk.Context, owner sdk.AccAddress, spender sdk.AccAddress, denom string) (amount sdk.Coin) {
 	return k.allowance(ctx, owner, spender, denom)
+}
+
+func (k *Keeper) Allowances(ctx sdk.Context, owner sdk.AccAddress, denom string) (amount sdk.Coin) {
+	return k.allowances(ctx, owner, denom)
 }
 
 func (k *Keeper) IncreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, coins sdk.Coins) sdk.Error {

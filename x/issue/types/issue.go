@@ -49,7 +49,7 @@ type IIssue interface {
 	ToCoin() sdk.Coin
 }
 
-type CoinIssues []CoinIssue
+type CoinIssues []*CoinIssue
 
 //nolint
 func (coinIssues CoinIssues) String() string {
@@ -75,7 +75,7 @@ type CoinIssue struct {
 	BurnHolderDisabled bool           `json:"burn_holder_disabled"`
 	BurnFromDisabled   bool           `json:"burn_from_disabled"`
 	FreezeDisabled     bool           `json:"freeze_disabled"`
-	MintingFinished    bool           `json:"minting_finished"`
+	MintDisabled       bool           `json:"mint_disabled"`
 }
 
 func NewCoinIssue(owner, issuer sdk.AccAddress, params *IssueParams) *CoinIssue {
@@ -179,4 +179,11 @@ func getDecimalsInt(decimals uint) sdk.Int {
 
 func (ci *CoinIssue) QuoDecimals(amount sdk.Int) sdk.Int {
 	return amount.Quo(getDecimalsInt(ci.GetDecimals()))
+}
+
+func (ci *CoinIssue) String() string {
+	out := fmt.Sprintf("%-17s|%-44s|%-10s|%-6s|%-18s|%-8s|%s\n",
+		"IssueID", "Owner", "Name", "Symbol", "TotalSupply", "Decimals", "IssueTime")
+	out += fmt.Sprintf("%-44s|%-10s|%-6s|%-18s|%-8d|%d\n", ci.GetOwner().String(), ci.Denom, ci.Symbol, ci.TotalSupply.String(), ci.Decimals, ci.IssueTime)
+	return strings.TrimSpace(out)
 }

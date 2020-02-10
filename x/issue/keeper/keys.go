@@ -28,8 +28,13 @@ func KeyAddressDenoms(addr string) []byte {
 }
 
 // Key for getting a specific allowed from the store
-func KeyAllowance(issueID string, owner sdk.AccAddress, spender sdk.AccAddress) []byte {
-	return []byte(fmt.Sprintf("allowed:%s:%s:%s", issueID, owner.String(), spender.String()))
+func KeyAllowance(denom string, owner sdk.AccAddress, spender sdk.AccAddress) []byte {
+	return []byte(fmt.Sprintf("allowed:%s:%s:%s", denom, owner.String(), spender.String()))
+}
+
+// Key for getting a specific allowed from the store
+func KeyAllowances(denom string, owner sdk.AccAddress) []byte {
+	return []byte(fmt.Sprintf("allowed:%s:%s", denom, owner.String()))
 }
 
 func KeyFreeze(issueID string, accAddress sdk.AccAddress) []byte {

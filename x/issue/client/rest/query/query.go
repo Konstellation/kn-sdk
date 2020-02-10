@@ -18,8 +18,8 @@ func RegisterQueryRoutes(cliCtx context.CLIContext, r *mux.Router) {
 		issuesHandlerFn(cliCtx),
 	).Methods("GET")
 	r.HandleFunc(
-		"/issue/issue/{id}",
-		issuesHandlerFn(cliCtx),
+		"/issue/issue/{denom}",
+		issueHandlerFn(cliCtx),
 	).Methods("GET")
 	r.HandleFunc(
 		"/issue/allowance/{owner}/{spender}/{denom}",

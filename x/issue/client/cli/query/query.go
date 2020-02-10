@@ -20,9 +20,11 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		getQueryCmdIssue(cdc),
 		getQueryCmdIssues(cdc),
 		getQueryCmdIssuesAll(cdc),
 		getQueryCmdAllowance(cdc),
+		getQueryCmdAllowances(cdc),
 	)
 
 	return cmd

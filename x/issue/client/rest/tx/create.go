@@ -25,7 +25,7 @@ type (
 		BurnOwnerDisabled  bool         `json:"burn_owner_disabled" yaml:"burn_owner_disabled"`
 		BurnHolderDisabled bool         `json:"burn_holder_disabled" yaml:"burn_holder_disabled"`
 		BurnFromDisabled   bool         `json:"burn_from_disabled" yaml:"burn_from_disabled"`
-		MintingFinished    bool         `json:"minting_finished" yaml:"minting_finished"`
+		MintDisabled       bool         `json:"mint_disabled" yaml:"mint_disabled"`
 		FreezeDisabled     bool         `json:"freeze_disabled" yaml:"freeze_disabled"`
 	}
 )

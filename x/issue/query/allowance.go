@@ -5,7 +5,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/konstellation/kn-sdk/x/issue/keeper"
-	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
 func Allowance(ctx sdk.Context, k keeper.Keeper, denom string, owner string, spender string) ([]byte, sdk.Error) {
@@ -18,7 +17,7 @@ func Allowance(ctx sdk.Context, k keeper.Keeper, denom string, owner string, spe
 	//	amount = issue.QuoDecimals(amount)
 	//}
 
-	bz, err := codec.MarshalJSONIndent(k.GetCodec(), types.NewAllowance(amount))
+	bz, err := codec.MarshalJSONIndent(k.GetCodec(), amount)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

@@ -19,11 +19,11 @@ import (
 
 const (
 	flagDecimals           = "decimals"
-	flagMintingFinished    = "minting-finished"
 	flagBurnOwnerDisabled  = "burn-owner"
 	flagBurnHolderDisabled = "burn-holder"
 	flagBurnFromDisabled   = "burn-from"
 	flagFreezeDisabled     = "freeze"
+	flagMintDisabled       = "mint"
 	flagDescription        = "description"
 )
 
@@ -56,7 +56,7 @@ func getTxCmdCreate(cdc *codec.Codec) *cobra.Command {
 				BurnOwnerDisabled:  viper.GetBool(flagBurnOwnerDisabled),
 				BurnHolderDisabled: viper.GetBool(flagBurnHolderDisabled),
 				BurnFromDisabled:   viper.GetBool(flagBurnFromDisabled),
-				MintingFinished:    viper.GetBool(flagMintingFinished),
+				MintDisabled:       viper.GetBool(flagMintDisabled),
 				FreezeDisabled:     viper.GetBool(flagFreezeDisabled),
 			}
 
@@ -73,7 +73,7 @@ func getTxCmdCreate(cdc *codec.Codec) *cobra.Command {
 	cmd.Flags().Bool(flagBurnOwnerDisabled, false, "Disable token owner burn the token")
 	cmd.Flags().Bool(flagBurnHolderDisabled, false, "Disable token holder burn the token")
 	cmd.Flags().Bool(flagBurnFromDisabled, false, "Disable token owner burn the token from any holder")
-	cmd.Flags().Bool(flagMintingFinished, false, "Token owner can not minting the token")
+	cmd.Flags().Bool(flagMintDisabled, false, "Token owner can not minting the token")
 	cmd.Flags().Bool(flagFreezeDisabled, false, "Token holder can transfer the token in and out")
 
 	return cmd
