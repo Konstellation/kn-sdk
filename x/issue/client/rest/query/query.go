@@ -25,4 +25,8 @@ func RegisterQueryRoutes(cliCtx context.CLIContext, r *mux.Router) {
 		"/issue/allowance/{owner}/{spender}/{denom}",
 		allowanceHandlerFn(cliCtx),
 	).Methods("GET")
+	r.HandleFunc(
+		"/issue/allowances/{owner}/{denom}",
+		allowancesHandlerFn(cliCtx),
+	).Methods("GET")
 }

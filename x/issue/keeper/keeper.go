@@ -274,6 +274,27 @@ func (k *Keeper) setIssue(ctx sdk.Context, issue *types.CoinIssue) {
 	store.Set(KeyIssuer(issue.GetDenom()), k.GetCodec().MustMarshalBinaryLengthPrefixed(issue))
 }
 
+// allowance
+
+func (k *Keeper) setAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
+	store := ctx.KVStore(k.key)
+	bz := k.cdc.MustMarshalBinaryLengthPrefixed(amount.Amount)
+	store.Set(KeyAllowance(amount.Denom, owner, spender), bz)
+}
+
+func (k *Keeper) setAllowances(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
+	store := ctx.KVStore(k.key)
+	allowances := make(types.Allowances, 0)
+	bz := store.Get(KeyAllowances(amount.Denom, owner))
+	if bz != nil {
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &allowances)
+	}
+
+	allowances = append(allowances, types.NewAllowance(amount, spender))
+	bz = k.cdc.MustMarshalBinaryLengthPrefixed(allowances)
+	store.Set(KeyAllowances(amount.Denom, owner), bz)
+}
+
 // ----------------------- issues -----------------------
 
 func (k *Keeper) getIssues(ctx sdk.Context, denoms []string) types.CoinIssues {
@@ -367,30 +388,25 @@ func (k *Keeper) allowance(ctx sdk.Context, owner, spender sdk.AccAddress, denom
 	return sdk.NewCoin(denom, amount)
 }
 
-func (k *Keeper) allowances(ctx sdk.Context, owner sdk.AccAddress, denom string) sdk.Coin {
+func (k *Keeper) allowances(ctx sdk.Context, owner sdk.AccAddress, denom string) types.Allowances {
 	store := ctx.KVStore(k.key)
+	allowances := make(types.Allowances, 0)
 	bz := store.Get(KeyAllowances(denom, owner))
-	if bz == nil {
-		return sdk.NewCoin(denom, sdk.ZeroInt())
-		//return sdk.NewCoins(sdk.NewCoin(denom, sdk.ZeroInt()))
+	if bz != nil {
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &allowances)
 	}
 
-	var amount sdk.Int
-	k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &amount)
-	return sdk.NewCoin(denom, amount)
+	return allowances
 }
 
 func (k *Keeper) approve(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
-	store := ctx.KVStore(k.key)
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(amount.Amount)
-	store.Set(KeyAllowance(amount.Denom, owner, spender), bz)
-	bz = k.cdc.MustMarshalBinaryLengthPrefixed(types.NewAllowance(amount, spender))
-	store.Set(KeyAllowances(amount.Denom, owner), bz)
+	k.setAllowance(ctx, owner, spender, amount)
+	k.setAllowances(ctx, owner, spender, amount)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeApprove,
-			sdk.NewAttribute(types.AttributeKeyIssueId, amount.Denom),
+			sdk.NewAttribute(types.AttributeKeyDenom, amount.Denom),
 			sdk.NewAttribute(types.AttributeKeyOwner, owner.String()),
 			sdk.NewAttribute(types.AttributeKeySpender, spender.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, amount.Amount.String()),
@@ -405,7 +421,7 @@ func (k *Keeper) increaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddres
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeIncreaseAllowance,
-			sdk.NewAttribute(types.AttributeKeyIssueId, amount.Denom),
+			sdk.NewAttribute(types.AttributeKeyDenom, amount.Denom),
 			sdk.NewAttribute(types.AttributeKeyOwner, owner.String()),
 			sdk.NewAttribute(types.AttributeKeySpender, spender.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, amount.Amount.String()),
@@ -424,7 +440,7 @@ func (k *Keeper) decreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddres
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeDecreaseAllowance,
-			sdk.NewAttribute(types.AttributeKeyIssueId, amount.Denom),
+			sdk.NewAttribute(types.AttributeKeyDenom, amount.Denom),
 			sdk.NewAttribute(types.AttributeKeyOwner, owner.String()),
 			sdk.NewAttribute(types.AttributeKeySpender, spender.String()),
 			sdk.NewAttribute(sdk.AttributeKeyAmount, amount.Amount.String()),
@@ -522,6 +538,11 @@ func (k *Keeper) CreateIssue(ctx sdk.Context, owner, issuer sdk.AccAddress, para
 }
 
 func (k *Keeper) Issue(ctx sdk.Context, issue *types.CoinIssue) sdk.Error {
+	i := k.getIssue(ctx, issue.Denom)
+	if i != nil {
+		return types.ErrIssueAlreadyExists()
+	}
+
 	k.addIssue(ctx, issue)
 
 	ctx.EventManager().EmitEvent(
@@ -581,11 +602,11 @@ func (k *Keeper) Approve(ctx sdk.Context, owner, spender sdk.AccAddress, coins s
 	return nil
 }
 
-func (k *Keeper) Allowance(ctx sdk.Context, owner sdk.AccAddress, spender sdk.AccAddress, denom string) (amount sdk.Coin) {
+func (k *Keeper) Allowance(ctx sdk.Context, owner sdk.AccAddress, spender sdk.AccAddress, denom string) sdk.Coin {
 	return k.allowance(ctx, owner, spender, denom)
 }
 
-func (k *Keeper) Allowances(ctx sdk.Context, owner sdk.AccAddress, denom string) (amount sdk.Coin) {
+func (k *Keeper) Allowances(ctx sdk.Context, owner sdk.AccAddress, denom string) types.Allowances {
 	return k.allowances(ctx, owner, denom)
 }
 

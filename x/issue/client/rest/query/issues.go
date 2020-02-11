@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
-
 	"github.com/cosmos/cosmos-sdk/client/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/rest"
@@ -28,10 +26,6 @@ func pathQueryIssues() string {
 // HTTP request handler to query specified issues
 func issuesHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		id := vars["id"]
-		fmt.Println(id)
-
 		var params types.IssuesParams
 
 		ownerAddr := r.URL.Query().Get(flagOwner)

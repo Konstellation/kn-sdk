@@ -15,6 +15,7 @@ const (
 	CodeIssuerMismatch       sdk.CodeType      = 2
 	CodeIssueIDNotValid      sdk.CodeType      = 3
 	CodeAmountLowerAllowance sdk.CodeType      = 4
+	CodeIssueExists          sdk.CodeType      = 5
 	CodeUnknownIssue         sdk.CodeType      = 10
 )
 
@@ -35,8 +36,12 @@ func ErrInvalidIssueParams() sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeInvalidInput, "Invalid issue params")
 }
 
-func ErrUnknownIssue(issueID string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeUnknownIssue, fmt.Sprintf("Unknown issue with id %s", issueID))
+func ErrIssueAlreadyExists() sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeIssueExists, "Issue already exists")
+}
+
+func ErrUnknownIssue(denom string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeUnknownIssue, fmt.Sprintf("Unknown issue %s", denom))
 }
 
 func ErrOwnerMismatch(issueID string) sdk.Error {

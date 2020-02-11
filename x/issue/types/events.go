@@ -19,6 +19,7 @@ const (
 	AttributeKeyFrom      = "from"
 	AttributeKeyTo        = "to"
 	AttributeKeySpender   = "spender"
+	AttributeKeyDenom     = "denom"
 	AttributeKeyIssueId   = "issueId"
 	AttributeKeyMinter    = "minter"
 	AttributeKeyBurner    = "burner"
