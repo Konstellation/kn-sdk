@@ -1,22 +1,14 @@
 package query
 
 import (
-	"fmt"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/konstellation/kn-sdk/x/issue/query"
 	"github.com/konstellation/kn-sdk/x/issue/types"
 	"github.com/spf13/cobra"
 )
 
-func pathQueryIssue(denom string) string {
-	return fmt.Sprintf("%s/%s/%s/%s", types.Custom, types.QuerierRoute, types.QueryIssue, denom)
-}
-
-func getIssue(cliCtx context.CLIContext, denom string) ([]byte, int64, error) {
-	return cliCtx.QueryWithData(pathQueryIssue(denom), nil)
-}
-
-// getCmdQueryIssues implements the query issue command.
+// getCmdQueryIssue implements the query issue command.
 func getQueryCmdIssue(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "find",
@@ -29,7 +21,7 @@ func getQueryCmdIssue(cdc *codec.Codec) *cobra.Command {
 			denom := args[0]
 
 			// Query the issues
-			res, _, err := getIssue(cliCtx, denom)
+			res, _, err := cliCtx.QueryWithData(query.PathQueryIssue(denom), nil)
 			if err != nil {
 				return err
 			}

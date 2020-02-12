@@ -1,7 +1,7 @@
 package query
 
 import (
-	"fmt"
+	"github.com/konstellation/kn-sdk/x/issue/query"
 	"net/http"
 	"strconv"
 
@@ -18,10 +18,6 @@ const (
 	flagLimit   = "limit"
 	flagSymbol  = "symbol"
 )
-
-func pathQueryIssues() string {
-	return fmt.Sprintf("%s/%s/%s", types.Custom, types.QuerierRoute, types.QueryIssues)
-}
 
 // HTTP request handler to query specified issues
 func issuesHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
@@ -55,7 +51,7 @@ func issuesHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		res, height, err := cliCtx.QueryWithData(pathQueryIssues(), bz)
+		res, height, err := cliCtx.QueryWithData(query.PathQueryIssues(), bz)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return

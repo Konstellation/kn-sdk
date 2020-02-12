@@ -25,6 +25,7 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 		getQueryCmdIssuesAll(cdc),
 		getQueryCmdAllowance(cdc),
 		getQueryCmdAllowances(cdc),
+		getQueryCmdParams(cdc),
 	)
 
 	return cmd

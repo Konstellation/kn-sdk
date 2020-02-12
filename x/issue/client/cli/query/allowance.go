@@ -1,8 +1,7 @@
 package query
 
 import (
-	"fmt"
-
+	"github.com/konstellation/kn-sdk/x/issue/query"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -11,14 +10,6 @@ import (
 
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
-
-func pathQueryIssueAllowance(owner sdk.AccAddress, spender sdk.AccAddress, denom string) string {
-	return fmt.Sprintf("%s/%s/%s/%s/%s/%s", types.Custom, types.QuerierRoute, types.QueryAllowance, denom, owner.String(), spender.String())
-}
-
-func getIssueAllowance(cliCtx context.CLIContext, owner sdk.AccAddress, spender sdk.AccAddress, issueID string) ([]byte, int64, error) {
-	return cliCtx.QueryWithData(pathQueryIssueAllowance(owner, spender, issueID), nil)
-}
 
 // getQueryCmdAllowance implements the query issue command.
 func getQueryCmdAllowance(cdc *codec.Codec) *cobra.Command {
@@ -41,7 +32,7 @@ func getQueryCmdAllowance(cdc *codec.Codec) *cobra.Command {
 
 			denom := args[2]
 
-			res, _, err := getIssueAllowance(cliCtx, owner, spender, denom)
+			res, _, err := cliCtx.QueryWithData(query.PathQueryIssueAllowance(owner, spender, denom), nil)
 			if err != nil {
 				return err
 			}

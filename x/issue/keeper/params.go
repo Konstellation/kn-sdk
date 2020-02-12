@@ -1,69 +1,61 @@
 package keeper
 
-//
-//import (
-//	sdk "github.com/cosmos/cosmos-sdk/types"
-//	"github.com/cosmos/cosmos-sdk/x/params"
-//)
-//
-//// type declaration for parameters
-//func ParamKeyTable() params.KeyTable {
-//	return params.NewKeyTable(
-//		ParamStoreKeyCommunityTax, sdk.Dec{},
-//		ParamStoreKeyBaseProposerReward, sdk.Dec{},
-//		ParamStoreKeyBonusProposerReward, sdk.Dec{},
-//		ParamStoreKeyWithdrawAddrEnabled, false,
-//	)
-//}
-//
-//// returns the current CommunityTax rate from the global param store
-//// nolint: errcheck
-//func (k Keeper) GetCommunityTax(ctx sdk.Context) sdk.Dec {
-//	var percent sdk.Dec
-//	k.paramSpace.Get(ctx, ParamStoreKeyCommunityTax, &percent)
-//	return percent
-//}
-//
-//// nolint: errcheck
-//func (k Keeper) SetCommunityTax(ctx sdk.Context, percent sdk.Dec) {
-//	k.paramSpace.Set(ctx, ParamStoreKeyCommunityTax, &percent)
-//}
-//
-//// returns the current BaseProposerReward rate from the global param store
-//// nolint: errcheck
-//func (k Keeper) GetBaseProposerReward(ctx sdk.Context) sdk.Dec {
-//	var percent sdk.Dec
-//	k.paramSpace.Get(ctx, ParamStoreKeyBaseProposerReward, &percent)
-//	return percent
-//}
-//
-//// nolint: errcheck
-//func (k Keeper) SetBaseProposerReward(ctx sdk.Context, percent sdk.Dec) {
-//	k.paramSpace.Set(ctx, ParamStoreKeyBaseProposerReward, &percent)
-//}
-//
-//// returns the current BaseProposerReward rate from the global param store
-//// nolint: errcheck
-//func (k Keeper) GetBonusProposerReward(ctx sdk.Context) sdk.Dec {
-//	var percent sdk.Dec
-//	k.paramSpace.Get(ctx, ParamStoreKeyBonusProposerReward, &percent)
-//	return percent
-//}
-//
-//// nolint: errcheck
-//func (k Keeper) SetBonusProposerReward(ctx sdk.Context, percent sdk.Dec) {
-//	k.paramSpace.Set(ctx, ParamStoreKeyBonusProposerReward, &percent)
-//}
-//
-//// returns the current WithdrawAddrEnabled
-//// nolint: errcheck
-//func (k Keeper) GetWithdrawAddrEnabled(ctx sdk.Context) bool {
-//	var enabled bool
-//	k.paramSpace.Get(ctx, ParamStoreKeyWithdrawAddrEnabled, &enabled)
-//	return enabled
-//}
-//
-//// nolint: errcheck
-//func (k Keeper) SetWithdrawAddrEnabled(ctx sdk.Context, enabled bool) {
-//	k.paramSpace.Set(ctx, ParamStoreKeyWithdrawAddrEnabled, &enabled)
-//}
+import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/konstellation/kn-sdk/x/issue/types"
+)
+
+// type declaration for parameters
+func ParamKeyTable() params.KeyTable {
+	return params.NewKeyTable().RegisterParamSet(&types.Params{})
+}
+
+func (k Keeper) IssueFee(ctx sdk.Context) (res sdk.Coin) {
+	k.paramSubspace.Get(ctx, types.KeyIssueFee, &res)
+	return
+}
+func (k Keeper) MintFee(ctx sdk.Context) (res sdk.Coin) {
+	k.paramSubspace.Get(ctx, types.KeyMintFee, &res)
+	return
+}
+func (k Keeper) BurnFee(ctx sdk.Context) (res sdk.Coin) {
+	k.paramSubspace.Get(ctx, types.KeyBurnFee, &res)
+	return
+}
+func (k Keeper) BurnFromFee(ctx sdk.Context) (res sdk.Coin) {
+	k.paramSubspace.Get(ctx, types.KeyBurnFromFee, &res)
+	return
+}
+func (k Keeper) FreezeFee(ctx sdk.Context) (res sdk.Coin) {
+	k.paramSubspace.Get(ctx, types.KeyFreezeFee, &res)
+	return
+}
+func (k Keeper) UnfreezeFee(ctx sdk.Context) (res sdk.Coin) {
+	k.paramSubspace.Get(ctx, types.KeyUnFreezeFee, &res)
+	return
+}
+
+func (k Keeper) TransferOwnerFee(ctx sdk.Context) (res sdk.Coin) {
+	k.paramSubspace.Get(ctx, types.KeyTransferOwnerFee, &res)
+	return
+}
+
+func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
+	k.paramSubspace.GetParamSet(ctx, &params)
+	return
+	//return types.NewParams(
+	//	k.IssueFee(ctx),
+	//	k.MintFee(ctx),
+	//	k.BurnFee(ctx),
+	//	k.BurnFromFee(ctx),
+	//	k.FreezeFee(ctx),
+	//	k.UnfreezeFee(ctx),
+	//	k.TransferOwnerFee(ctx),
+	//)
+}
+
+// set the params
+func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
+	k.paramSubspace.SetParamSet(ctx, &params)
+}

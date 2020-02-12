@@ -12,9 +12,8 @@ import (
 )
 
 const (
-	ModuleName = types.ModuleName
-	StoreKey   = types.StoreKey
-	//FeeCollectorName              = types.FeeCollectorName
+	ModuleName        = types.ModuleName
+	StoreKey          = types.StoreKey
 	QuerierRoute      = types.QuerierRoute
 	DefaultParamspace = types.DefaultParamspace
 	DefaultCodespace  = types.DefaultCodespace
@@ -22,11 +21,9 @@ const (
 
 var (
 	// functions aliases
-	//NewAccountKeeper                  = keeper.NewAccountKeeper
 	RegisterCodec               = types.RegisterCodec
 	NewGenesisState             = types.NewGenesisState
 	DefaultGenesisState         = types.DefaultGenesisState
-	ValidateGenesis             = types.ValidateGenesis
 	NewParams                   = types.NewParams
 	ParamKeyTable               = types.ParamKeyTable
 	DefaultParams               = types.DefaultParams
@@ -37,11 +34,7 @@ var (
 )
 
 type (
-	Keeper = keeper.Keeper
-	//BaseAccount                      = types.BaseAccount
-	//NodeQuerier                      = types.NodeQuerier
-	//AccountRetriever                 = types.AccountRetriever
+	Keeper       = keeper.Keeper
 	GenesisState = types.GenesisState
 	Params       = types.Params
-	//QueryAccountParams               = types.QueryAccountParams
 )

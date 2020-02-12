@@ -1,7 +1,7 @@
 package query
 
 import (
-	"fmt"
+	"github.com/konstellation/kn-sdk/x/issue/query"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -17,18 +17,6 @@ const (
 	flagLimit   = "limit"
 	flagSymbol  = "symbol"
 )
-
-func pathQueryIssues() string {
-	return fmt.Sprintf("%s/%s/%s", types.Custom, types.QuerierRoute, types.QueryIssues)
-}
-
-func getIssuesList(cliCtx context.CLIContext, params types.IssuesParams) ([]byte, int64, error) {
-	bz, err := cliCtx.Codec.MarshalJSON(params)
-	if err != nil {
-		return nil, 0, err
-	}
-	return cliCtx.QueryWithData(pathQueryIssues(), bz)
-}
 
 // getCmdQueryIssues implements the query issue command.
 func getQueryCmdIssues(cdc *codec.Codec) *cobra.Command {
@@ -48,8 +36,13 @@ func getQueryCmdIssues(cdc *codec.Codec) *cobra.Command {
 				viper.GetInt(flagLimit),
 			)
 
+			bz, err := cliCtx.Codec.MarshalJSON(qp)
+			if err != nil {
+				return err
+			}
+
 			// Query the issues
-			res, _, err := getIssuesList(cliCtx, qp)
+			res, _, err := cliCtx.QueryWithData(query.PathQueryIssues(), bz)
 			if err != nil {
 				return err
 			}

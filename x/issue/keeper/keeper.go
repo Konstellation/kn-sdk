@@ -46,17 +46,19 @@ func NewKeeper(
 	ak types.AccountKeeper,
 	ck types.CoinKeeper,
 	sk types.SupplyKeeper,
-	codespace sdk.CodespaceType) Keeper {
+	codespace sdk.CodespaceType,
+	paramsKeeper params.Keeper,
+	paramSpace params.Subspace) Keeper {
 
 	return Keeper{
-		key: key,
-		cdc: cdc,
-		//paramSubspace: paramstore.WithKeyTable(types.ParamKeyTable()),
-		codespace: codespace,
-		//paramsKeeper: paramsKeeper,
-		ak: ak,
-		ck: ck,
-		sk: sk,
+		key:           key,
+		cdc:           cdc,
+		paramSubspace: paramSpace.WithKeyTable(types.ParamKeyTable()),
+		codespace:     codespace,
+		paramsKeeper:  paramsKeeper,
+		ak:            ak,
+		ck:            ck,
+		sk:            sk,
 	}
 }
 
@@ -85,6 +87,14 @@ func (k *Keeper) setLastId(ctx sdk.Context, id uint64) {
 
 func (k *Keeper) incLastId(ctx sdk.Context) {
 	k.setLastId(ctx, k.getLastId(ctx)+1)
+}
+
+func (k *Keeper) SetLastId(ctx sdk.Context, id uint64) {
+	k.setLastId(ctx, id)
+}
+
+func (k *Keeper) GetLastId(ctx sdk.Context) uint64 {
+	return k.getLastId(ctx)
 }
 
 // ----------------------- boundary denoms ----------------
@@ -539,6 +549,10 @@ func (k *Keeper) CreateIssue(ctx sdk.Context, owner, issuer sdk.AccAddress, para
 	issue.SetIssueTime(ctx.BlockHeader().Time.Unix())
 
 	return issue
+}
+
+func (k *Keeper) AddIssue(ctx sdk.Context, issue *types.CoinIssue) {
+	k.addIssue(ctx, issue)
 }
 
 func (k *Keeper) Issue(ctx sdk.Context, issue *types.CoinIssue) sdk.Error {

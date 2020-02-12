@@ -10,13 +10,20 @@ import (
 type CodeType = sdk.CodeType
 
 const (
-	DefaultCodespace         sdk.CodespaceType = "issue"
-	CodeInvalidInput         CodeType          = 103
-	CodeIssuerMismatch       sdk.CodeType      = 2
-	CodeIssueIDNotValid      sdk.CodeType      = 3
-	CodeAmountLowerAllowance sdk.CodeType      = 4
-	CodeIssueExists          sdk.CodeType      = 5
-	CodeUnknownIssue         sdk.CodeType      = 10
+	DefaultCodespace            sdk.CodespaceType = "issue"
+	CodeInvalidInput            CodeType          = 400
+	CodeIssuerMismatch          sdk.CodeType      = 2
+	CodeIssueIDNotValid         sdk.CodeType      = 3
+	CodeAmountLowerAllowance    sdk.CodeType      = 4
+	CodeIssueExists             sdk.CodeType      = 5
+	CodeUnknownIssue            sdk.CodeType      = 10
+	CodeInvalidIssueFee         sdk.CodeType      = 401
+	CodeInvalidMintFee          sdk.CodeType      = 402
+	CodeInvalidBurnFee          sdk.CodeType      = 402
+	CodeInvalidBurnFromFee      sdk.CodeType      = 403
+	CodeInvalidFreezeFee        sdk.CodeType      = 404
+	CodeInvalidUnFreezeFee      sdk.CodeType      = 405
+	CodeInvalidTransferOwnerFee sdk.CodeType      = 406
 )
 
 //convert sdk.Error to error
@@ -108,3 +115,31 @@ func ErrAmountGreaterThanAllowance(amt sdk.Coin, allowance sdk.Coin) sdk.Error {
 //func ErrCanNotTransferOut(issueID string, accAddress string) sdk.Error {
 //	return sdk.NewError(DefaultCodespace, CodeNotTransferOut, fmt.Sprintf("Can not transfer out %s from %s", issueID, accAddress))
 //}
+
+func ErrInvalidIssueFee(fee string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidIssueFee, fmt.Sprintf("invalid issue fee: %s", fee))
+}
+
+func ErrInvalidMintFee(fee string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidMintFee, fmt.Sprintf("invalid mint fee: %s", fee))
+}
+
+func ErrInvalidBurnFee(fee string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidBurnFee, fmt.Sprintf("invalid burn fee: %s", fee))
+}
+
+func ErrInvalidBurnFromFee(fee string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidBurnFromFee, fmt.Sprintf("invalid burn from fee: %s", fee))
+}
+
+func ErrInvalidFreezeFee(fee string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidFreezeFee, fmt.Sprintf("invalid freeze fee: %s", fee))
+}
+
+func ErrInvalidUnfreezeFee(fee string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidUnFreezeFee, fmt.Sprintf("invalid unfreeze fee: %s", fee))
+}
+
+func ErrInvalidTransferOwnerFee(fee string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidTransferOwnerFee, fmt.Sprintf("invalid transfer owner fee: %s", fee))
+}

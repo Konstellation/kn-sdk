@@ -21,6 +21,7 @@ func RegisterCodec(cdc *codec.Codec) {
 
 	cdc.RegisterInterface((*IIssue)(nil), nil)
 	cdc.RegisterConcrete(&CoinIssue{}, "issue/CoinIssue", nil)
+	cdc.RegisterConcrete(Params{}, "issue/Params", nil)
 }
 
 func init() {
