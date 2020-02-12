@@ -285,12 +285,16 @@ func (k *Keeper) setAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, am
 func (k *Keeper) setAllowances(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
 	store := ctx.KVStore(k.key)
 	allowances := make(types.Allowances, 0)
+	allowance := types.NewAllowance(amount, spender)
 	bz := store.Get(KeyAllowances(amount.Denom, owner))
 	if bz != nil {
 		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &allowances)
 	}
-
-	allowances = append(allowances, types.NewAllowance(amount, spender))
+	if i := allowances.ContainsI(allowance); i > -1 {
+		allowances[i] = allowance
+	} else {
+		allowances = append(allowances, allowance)
+	}
 	bz = k.cdc.MustMarshalBinaryLengthPrefixed(allowances)
 	store.Set(KeyAllowances(amount.Denom, owner), bz)
 }

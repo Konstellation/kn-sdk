@@ -21,9 +21,29 @@ func (a Allowance) String() string {
 
 type Allowances []*Allowance
 
-func (a *Allowances) String() (str string) {
-	for _, allowance := range *a {
+func (as *Allowances) String() (str string) {
+	for _, allowance := range *as {
 		str += fmt.Sprintf(`%s:%s`, allowance.Spender, allowance.Amount)
 	}
 	return
+}
+
+func (as *Allowances) ContainsI(al *Allowance) int {
+	for i, a := range *as {
+		if a.Spender == al.Spender {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func (as *Allowances) Contains(al *Allowance) bool {
+	for _, a := range *as {
+		if a.Spender == al.Spender {
+			return true
+		}
+	}
+
+	return false
 }
