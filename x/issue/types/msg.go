@@ -12,7 +12,6 @@ const (
 	TypeMsgIncreaseAllowance = "increase_allowance"
 	TypeMsgDecreaseAllowance = "decrease_allowance"
 	TypeMsgMint              = "mint"
-	TypeMsgMintTo            = "mint_to"
 	TypeMsgBurn              = "burn"
 	TypeMsgBurnFrom          = "burn_from"
 )
@@ -24,7 +23,6 @@ var _ sdk.Msg = &MsgIncreaseAllowance{}
 var _ sdk.Msg = &MsgDecreaseAllowance{}
 var _ sdk.Msg = &MsgTransferFrom{}
 var _ sdk.Msg = &MsgMint{}
-var _ sdk.Msg = &MsgMintTo{}
 var _ sdk.Msg = &MsgBurn{}
 var _ sdk.Msg = &MsgBurnFrom{}
 
@@ -313,12 +311,13 @@ func (msg MsgDecreaseAllowance) GetSigners() []sdk.AccAddress {
 }
 
 type MsgMint struct {
-	Minter sdk.AccAddress `json:"minter" yaml:"minter"`
-	Amount sdk.Coins      `json:"amount" yaml:"amount"`
+	Minter    sdk.AccAddress `json:"minter" yaml:"minter"`
+	ToAddress sdk.AccAddress `json:"to_address" yaml:"to_address"`
+	Amount    sdk.Coins      `json:"amount" yaml:"amount"`
 }
 
-func NewMsgMint(minter sdk.AccAddress, amount sdk.Coins) MsgMint {
-	return MsgMint{Minter: minter, Amount: amount}
+func NewMsgMint(minter, toAddr sdk.AccAddress, amount sdk.Coins) MsgMint {
+	return MsgMint{Minter: minter, ToAddress: toAddr, Amount: amount}
 }
 
 // Route Implements Msg.
@@ -331,6 +330,9 @@ func (msg MsgMint) Type() string { return TypeMsgMint }
 func (msg MsgMint) ValidateBasic() sdk.Error {
 	if msg.Minter.Empty() {
 		return sdk.ErrInvalidAddress("missing minter address")
+	}
+	if msg.ToAddress.Empty() {
+		return sdk.ErrInvalidAddress("missing recipient address")
 	}
 	if !msg.Amount.IsValid() {
 		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
@@ -348,49 +350,6 @@ func (msg MsgMint) GetSignBytes() []byte {
 
 // GetSigners Implements Msg.
 func (msg MsgMint) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.Minter}
-}
-
-type MsgMintTo struct {
-	Minter    sdk.AccAddress `json:"minter" yaml:"minter"`
-	ToAddress sdk.AccAddress `json:"to_address" yaml:"to_address"`
-	Amount    sdk.Coins      `json:"amount" yaml:"amount"`
-}
-
-func NewMsgMintTo(minter, toAddr sdk.AccAddress, amount sdk.Coins) MsgMintTo {
-	return MsgMintTo{Minter: minter, ToAddress: toAddr, Amount: amount}
-}
-
-// Route Implements Msg.
-func (msg MsgMintTo) Route() string { return RouterKey }
-
-// Type Implements Msg.
-func (msg MsgMintTo) Type() string { return TypeMsgMintTo }
-
-// ValidateBasic Implements Msg.
-func (msg MsgMintTo) ValidateBasic() sdk.Error {
-	if msg.Minter.Empty() {
-		return sdk.ErrInvalidAddress("missing minter address")
-	}
-	if msg.ToAddress.Empty() {
-		return sdk.ErrInvalidAddress("missing recipient address")
-	}
-	if !msg.Amount.IsValid() {
-		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("send amount must be positive")
-	}
-	return nil
-}
-
-// GetSignBytes Implements Msg.
-func (msg MsgMintTo) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
-}
-
-// GetSigners Implements Msg.
-func (msg MsgMintTo) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Minter}
 }
 

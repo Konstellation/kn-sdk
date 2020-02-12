@@ -12,23 +12,28 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-// getTxCmdMint implements transfer function
+// getTxCmdMint implements mint function to recipient
 func getTxCmdMint(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "mint [amount]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Mint tokens to sender",
-		Long:  "Mint tokens to sender",
+		Use:   "mint [to_address] [amount]",
+		Args:  cobra.ExactArgs(2),
+		Short: "Mint tokens to address",
+		Long:  "Mint tokens to address",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			coins, err := sdk.ParseCoins(args[0])
+			to, err := sdk.AccAddressFromBech32(args[0])
 			if err != nil {
 				return err
 			}
 
-			msg := types.NewMsgMint(cliCtx.GetFromAddress(), coins)
+			coins, err := sdk.ParseCoins(args[1])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgMint(cliCtx.GetFromAddress(), to, coins)
 			validateErr := msg.ValidateBasic()
 			if validateErr != nil {
 				return validateErr

@@ -37,10 +37,6 @@ func RegisterTxRoutes(cliCtx context.CLIContext, r *mux.Router) {
 		mintHandlerFn(cliCtx),
 	).Methods("POST")
 	r.HandleFunc(
-		"/issue/mint_to",
-		mintToHandlerFn(cliCtx),
-	).Methods("POST")
-	r.HandleFunc(
 		"/issue/burn",
 		burnHandlerFn(cliCtx),
 	).Methods("POST")

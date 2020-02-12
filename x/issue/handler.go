@@ -36,8 +36,6 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handler.HandleMsgDecreaseAllowance(ctx, k, msg)
 		case types.MsgMint:
 			return handler.HandleMsgMint(ctx, k, msg)
-		case types.MsgMintTo:
-			return handler.HandleMsgMintTo(ctx, k, msg)
 		case types.MsgBurn:
 			return handler.HandleMsgBurn(ctx, k, msg)
 		case types.MsgBurnFrom:

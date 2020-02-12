@@ -16,7 +16,6 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgIncreaseAllowance{}, "issue/MsgIncreaseAllowance", nil)
 	cdc.RegisterConcrete(MsgDecreaseAllowance{}, "issue/MsgDecreaseAllowance", nil)
 	cdc.RegisterConcrete(MsgMint{}, "issue/MsgMint", nil)
-	cdc.RegisterConcrete(MsgMintTo{}, "issue/MsgMintTo", nil)
 	cdc.RegisterConcrete(MsgBurn{}, "issue/MsgBurn", nil)
 	cdc.RegisterConcrete(MsgBurnFrom{}, "issue/MsgBurnFrom", nil)
 

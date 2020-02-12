@@ -630,20 +630,7 @@ func (k *Keeper) DecreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddres
 	return nil
 }
 
-func (k *Keeper) Mint(ctx sdk.Context, minter sdk.AccAddress, coins sdk.Coins) sdk.Error {
-	return k.mint(ctx, minter, minter, coins)
-}
-
-func (k *Keeper) MintTo(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coins) sdk.Error {
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeMintTo,
-			sdk.NewAttribute(sdk.AttributeKeyAmount, coins.String()),
-			sdk.NewAttribute(types.AttributeKeyMinter, minter.String()),
-			sdk.NewAttribute(types.AttributeKeyTo, to.String()),
-		),
-	)
-
+func (k *Keeper) Mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coins) sdk.Error {
 	return k.mint(ctx, minter, to, coins)
 }
 

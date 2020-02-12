@@ -27,7 +27,6 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 		getTxCmdDecreaseAllowance(cdc),
 		getTxCmdTransferFrom(cdc),
 		getTxCmdMint(cdc),
-		getTxCmdMintTo(cdc),
 		getTxCmdBurn(cdc),
 		getTxCmdBurnFrom(cdc),
 	) {

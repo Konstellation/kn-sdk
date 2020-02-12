@@ -15,6 +15,7 @@ type (
 	// mintRequest defines the properties of transfer issues body.
 	mintRequest struct {
 		BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+		To      string       `json:"to" yaml:"to"`
 		Amount  sdk.Coins    `json:"amount" yaml:"amount"`
 	}
 )
@@ -37,7 +38,13 @@ func mintHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 			return
 		}
 
-		msg := types.NewMsgMint(minterAddr, req.Amount)
+		toAddr, err := sdk.AccAddressFromBech32(req.To)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		msg := types.NewMsgMint(minterAddr, toAddr, req.Amount)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
