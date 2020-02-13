@@ -36,7 +36,7 @@ func getQueryCmdFreeze(cdc *codec.Codec) *cobra.Command {
 			var freeze types.Freeze
 			cdc.MustUnmarshalJSON(res, &freeze)
 
-			return cliCtx.PrintOutput(freeze)
+			return cliCtx.PrintOutput(&freeze)
 		},
 	}
 

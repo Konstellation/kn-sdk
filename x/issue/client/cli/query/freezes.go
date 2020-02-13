@@ -19,7 +19,7 @@ func getQueryCmdFreezes(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			denom := args[1]
+			denom := args[0]
 
 			res, _, err := cliCtx.QueryWithData(query.PathQueryIssueFreezes(denom), nil)
 			if err != nil {

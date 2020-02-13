@@ -24,10 +24,14 @@ func NewQuerier(k keeper.Keeper) sdk.Querier {
 			return query.Allowance(ctx, k, path[1], path[2], path[3])
 		case types.QueryAllowances:
 			return query.Allowances(ctx, k, path[1], path[2])
+		case types.QueryFreeze:
+			return query.Freeze(ctx, k, path[1], path[2])
+		case types.QueryFreezes:
+			return query.Freezes(ctx, k, path[1])
 		case types.QueryParams:
 			return query.Params(ctx, k)
 		default:
-			return nil, sdk.ErrUnknownRequest("unknown auth query endpoint")
+			return nil, sdk.ErrUnknownRequest("unknown issue query endpoint")
 		}
 	}
 }

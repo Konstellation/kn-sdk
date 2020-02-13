@@ -35,5 +35,5 @@ func PathQueryIssueFreeze(denom string, holder sdk.AccAddress) string {
 }
 
 func PathQueryIssueFreezes(denom string) string {
-	return fmt.Sprintf("%s/%s/%s/%s", types.Custom, types.QuerierRoute, types.QueryFreeze, denom)
+	return fmt.Sprintf("%s/%s/%s/%s", types.Custom, types.QuerierRoute, types.QueryFreezes, denom)
 }
