@@ -44,4 +44,20 @@ func RegisterTxRoutes(cliCtx context.CLIContext, r *mux.Router) {
 		"/issue/burn_from",
 		burnFromHandlerFn(cliCtx),
 	).Methods("POST")
+	r.HandleFunc(
+		"/issue/transfer_ownership",
+		transferOwnershipHandlerFn(cliCtx),
+	).Methods("POST")
+	r.HandleFunc(
+		"/issue/disable_feature",
+		disableFeatureHandlerFn(cliCtx),
+	).Methods("POST")
+	r.HandleFunc(
+		"/issue/enable_feature",
+		enableFeatureHandlerFn(cliCtx),
+	).Methods("POST")
+	r.HandleFunc(
+		"/issue/features",
+		featuresHandlerFn(cliCtx),
+	).Methods("POST")
 }

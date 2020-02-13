@@ -15,6 +15,9 @@ const (
 	TypeMsgBurn              = "burn"
 	TypeMsgBurnFrom          = "burn_from"
 	TypeMsgTransferOwnership = "transfer_ownership"
+	TypeMsgDisableFeature    = "disable_feature"
+	TypeMsgEnableFeature     = "enable_feature"
+	TypeMsgFeatures          = "features"
 )
 
 var _ sdk.Msg = &MsgIssueCreate{}
@@ -27,6 +30,9 @@ var _ sdk.Msg = &MsgMint{}
 var _ sdk.Msg = &MsgBurn{}
 var _ sdk.Msg = &MsgBurnFrom{}
 var _ sdk.Msg = &MsgTransferOwnership{}
+var _ sdk.Msg = &MsgDisableFeature{}
+var _ sdk.Msg = &MsgEnableFeature{}
+var _ sdk.Msg = &MsgFeatures{}
 
 type MsgIssueCreate struct {
 	Owner        sdk.AccAddress `json:"owner" yaml:"owner"`
@@ -84,6 +90,126 @@ func (msg MsgIssueCreate) ValidateBasic() sdk.Error {
 	//if len(msg.Description) > CoinDescriptionMaxLength {
 	//	return errors.ErrCoinDescriptionMaxLengthNotValid()
 	//}
+	return nil
+}
+
+type MsgDisableFeature struct {
+	Owner   sdk.AccAddress `json:"owner" yaml:"owner"`
+	Denom   string         `json:"denom" yaml:"denom"`
+	Feature string         `json:"feature" yaml:"feature"`
+}
+
+func NewMsgDisableFeature(owner sdk.AccAddress, denom, feature string) MsgDisableFeature {
+	return MsgDisableFeature{Owner: owner, Denom: denom, Feature: feature}
+}
+
+// Route Implements Msg.
+func (msg MsgDisableFeature) Route() string { return RouterKey }
+
+// Type Implements Msg.
+func (msg MsgDisableFeature) Type() string { return TypeMsgDisableFeature }
+
+// ValidateBasic Implements Msg.
+func (msg MsgDisableFeature) ValidateBasic() sdk.Error {
+	if msg.Owner.Empty() {
+		return sdk.ErrInvalidAddress("missing owner address")
+	}
+
+	if msg.Denom == "" {
+		return ErrInvalidDenom(msg.Denom)
+	}
+	if msg.Feature == "" {
+		return ErrInvalidFeature(msg.Feature)
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgDisableFeature) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgDisableFeature) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
+}
+
+type MsgEnableFeature struct {
+	Owner   sdk.AccAddress `json:"owner" yaml:"owner"`
+	Denom   string         `json:"denom" yaml:"denom"`
+	Feature string         `json:"feature" yaml:"feature"`
+}
+
+func NewMsgEnableFeature(owner sdk.AccAddress, denom, feature string) MsgEnableFeature {
+	return MsgEnableFeature{Owner: owner, Denom: denom, Feature: feature}
+}
+
+// Route Implements Msg.
+func (msg MsgEnableFeature) Route() string { return RouterKey }
+
+// Type Implements Msg.
+func (msg MsgEnableFeature) Type() string { return TypeMsgEnableFeature }
+
+// ValidateBasic Implements Msg.
+func (msg MsgEnableFeature) ValidateBasic() sdk.Error {
+	if msg.Owner.Empty() {
+		return sdk.ErrInvalidAddress("missing owner address")
+	}
+	if msg.Denom == "" {
+		return ErrInvalidDenom(msg.Denom)
+	}
+	if msg.Feature == "" {
+		return ErrInvalidFeature(msg.Feature)
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgEnableFeature) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgEnableFeature) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
+}
+
+type MsgFeatures struct {
+	Owner          sdk.AccAddress `json:"owner" yaml:"owner"`
+	Denom          string         `json:"denom"`
+	*IssueFeatures `json:"features"`
+}
+
+func NewMsgFeatures(owner sdk.AccAddress, denom string, features *IssueFeatures) MsgFeatures {
+	return MsgFeatures{
+		owner,
+		denom,
+		features,
+	}
+}
+
+func (msg MsgFeatures) Route() string { return ModuleName }
+func (msg MsgFeatures) Type() string  { return TypeMsgFeatures }
+
+// Return address that must sign over msg.GetSignBytes()
+func (msg MsgFeatures) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
+}
+
+// get the bytes for the message signer to sign on
+func (msg MsgFeatures) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// quick validity check
+func (msg MsgFeatures) ValidateBasic() sdk.Error {
+	if msg.Owner.Empty() {
+		return sdk.ErrInvalidAddress("Owner address cannot be empty")
+	}
+	if msg.Denom == "" {
+		return ErrInvalidDenom(msg.Denom)
+	}
 	return nil
 }
 

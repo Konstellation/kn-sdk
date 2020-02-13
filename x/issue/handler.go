@@ -24,6 +24,8 @@ func NewHandler(k Keeper) sdk.Handler {
 
 		case types.MsgIssueCreate:
 			return handler.HandleMsgIssueCreate(ctx, k, msg)
+		case types.MsgFeatures:
+			return handler.HandleMsgFeatures(ctx, k, msg)
 		case types.MsgTransfer:
 			return handler.HandleMsgTransfer(ctx, k, msg)
 		case types.MsgTransferFrom:

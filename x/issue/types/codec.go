@@ -10,6 +10,9 @@ var ModuleCdc = codec.New()
 // RegisterCodec registers concrete types on the codec
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgIssueCreate{}, "issue/MsgIssueCreate", nil)
+	cdc.RegisterConcrete(MsgDisableFeature{}, "issue/MsgDisableFeature", nil)
+	cdc.RegisterConcrete(MsgEnableFeature{}, "issue/MsgEnableFeature", nil)
+	cdc.RegisterConcrete(MsgFeatures{}, "issue/MsgFeatures", nil)
 	cdc.RegisterConcrete(MsgTransfer{}, "issue/MsgTransfer", nil)
 	cdc.RegisterConcrete(MsgTransferFrom{}, "issue/MsgTransferFrom", nil)
 	cdc.RegisterConcrete(MsgApprove{}, "issue/MsgApprove", nil)

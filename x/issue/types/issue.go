@@ -81,6 +81,7 @@ type CoinIssue struct {
 func NewCoinIssue(owner, issuer sdk.AccAddress, params *IssueParams) *CoinIssue {
 	var ci CoinIssue
 	_ = mapstructure.Decode(params, &ci)
+	ci.SetFeatures(&params.IssueFeatures)
 	ci.Owner = owner
 	ci.Issuer = issuer
 	ci.Symbol = strings.ToUpper(ci.Symbol)
@@ -170,6 +171,14 @@ func (ci *CoinIssue) ToCoin() sdk.Coin {
 
 func (ci *CoinIssue) ToCoins() sdk.Coins {
 	return sdk.NewCoins(ci.ToCoin())
+}
+
+func (ci *CoinIssue) SetFeatures(features *IssueFeatures) {
+	ci.BurnOwnerDisabled = features.BurnOwnerDisabled
+	ci.BurnHolderDisabled = features.BurnHolderDisabled
+	ci.BurnFromDisabled = features.BurnFromDisabled
+	ci.MintDisabled = features.MintDisabled
+	ci.FreezeDisabled = features.FreezeDisabled
 }
 
 func getDecimalsInt(decimals uint) sdk.Int {

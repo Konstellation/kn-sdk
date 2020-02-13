@@ -7,7 +7,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/params/subspace"
-
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
@@ -301,6 +300,17 @@ func (k *Keeper) CreateIssue(ctx sdk.Context, owner, issuer sdk.AccAddress, para
 	return issue
 }
 
+func (k *Keeper) ChangeFeatures(ctx sdk.Context, owner sdk.AccAddress, denom string, features *types.IssueFeatures) sdk.Error {
+	i, err := k.getIssueIfOwner(ctx, denom, owner)
+	if err != nil {
+		return err
+	}
+
+	i.SetFeatures(features)
+	k.setIssue(ctx, i)
+	return nil
+}
+
 // ----------------------- issues -----------------------
 
 func (k *Keeper) getIssues(ctx sdk.Context, denoms []string) types.CoinIssues {
@@ -503,9 +513,11 @@ func (k *Keeper) mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coin
 			}
 		}
 
-		//if coinIssueInfo.IsMintingFinished() {
-		//	return nil, errors.ErrCanNotMint(issueID)
-		//}
+		if issue != nil {
+			if issue.MintDisabled {
+				return types.ErrCanNotMint(issue.Denom)
+			}
+		}
 	}
 
 	ctx.EventManager().EmitEvent(
@@ -529,6 +541,20 @@ func (k *Keeper) burn(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Co
 
 	for i, coin := range coins {
 		issue := k.getIssue(ctx, coin.Denom)
+
+		if issue.Owner.Equals(from) && issue.BurnOwnerDisabled {
+			return types.ErrCanNotBurnOwner(issue.Denom)
+		}
+		if burner.Equals(from) {
+			if issue.BurnHolderDisabled {
+				return types.ErrCanNotBurnHolder(issue.Denom)
+			}
+		} else {
+			if issue.BurnFromDisabled {
+				return types.ErrCanNotBurnFrom(issue.Denom)
+			}
+		}
+
 		issue.SubTotalSupply(coin.Amount)
 		k.setIssue(ctx, issue)
 

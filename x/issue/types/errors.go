@@ -14,10 +14,16 @@ const (
 	CodeInvalidInput            CodeType          = 400
 	CodeUnknownIssue            sdk.CodeType      = 1
 	CodeIssuerMismatch          sdk.CodeType      = 2
-	CodeDenomNotValid           sdk.CodeType      = 3
+	CodeInvalidDenom            sdk.CodeType      = 3
 	CodeAmountLowerAllowance    sdk.CodeType      = 4
 	CodeIssueExists             sdk.CodeType      = 5
 	CodeNotEnoughFee            sdk.CodeType      = 6
+	CodeInvalidFeature          sdk.CodeType      = 7
+	CodeCanNotMint              sdk.CodeType      = 8
+	CodeCanNotBurnOwner         sdk.CodeType      = 9
+	CodeCanNotBurnHolder        sdk.CodeType      = 10
+	CodeCanNotBurnFrom          sdk.CodeType      = 11
+	CodeCanNotFreeze            sdk.CodeType      = 12
 	CodeInvalidIssueFee         sdk.CodeType      = 401
 	CodeInvalidMintFee          sdk.CodeType      = 402
 	CodeInvalidBurnFee          sdk.CodeType      = 402
@@ -77,8 +83,16 @@ func ErrNotEnoughFee() sdk.Error {
 //	return sdk.NewError(DefaultCodespace, CodeIssueTotalSupplyNotValid, fmt.Sprintf("Total supply max value is %s", types.CoinMaxTotalSupply.String()))
 //}
 func ErrInvalidDenom(denom string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeDenomNotValid, fmt.Sprintf("Denom invalid %s", denom))
+	return sdk.NewError(DefaultCodespace, CodeInvalidDenom, fmt.Sprintf("Denom invalid %s", denom))
 }
+
+func ErrInvalidFeature(feature string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeInvalidFeature, fmt.Sprintf("Feature invalid %s", feature))
+}
+
+//func ErrUnknownFeatures() sdk.Error {
+//	return sdk.NewError(DefaultCodespace, CodeUnknownFeature, fmt.Sprintf("Unknown feature"))
+//}
 
 //func ErrFreezeEndTimestampNotValid() sdk.Error {
 //	return sdk.NewError(DefaultCodespace, CodeFreezeEndTimeNotValid, "end-time is not a valid timestamp")
@@ -92,18 +106,26 @@ func ErrInvalidDenom(denom string) sdk.Error {
 //func ErrCoinDescriptionMaxLengthNotValid() sdk.Error {
 //	return sdk.NewError(DefaultCodespace, CodeIssueDescriptionNotValid, "Description max length is %d", types.CoinDescriptionMaxLength)
 //}
-//func ErrCanNotMint(issueID string) sdk.Error {
-//	return sdk.NewError(DefaultCodespace, CanNotMint, fmt.Sprintf("Can not mint the token %s", issueID))
-//}
-//func ErrCanNotBurn(issueID string, burnType string) sdk.Error {
-//	return sdk.NewError(DefaultCodespace, CanNotBurn, fmt.Sprintf("Can not burn the token %s by %s", issueID, burnType))
-//}
-//func ErrUnknownFeatures() sdk.Error {
-//	return sdk.NewError(DefaultCodespace, CodeUnknownFeature, fmt.Sprintf("Unknown feature"))
-//}
-//func ErrCanNotFreeze(issueID string) sdk.Error {
-//	return sdk.NewError(DefaultCodespace, CodeCanNotFreeze, fmt.Sprintf("Can not freeze the token %s", issueID))
-//}
+func ErrCanNotMint(denom string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeCanNotMint, fmt.Sprintf("Can not mint the token %s", denom))
+}
+
+func ErrCanNotBurnOwner(denom string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeCanNotBurnOwner, fmt.Sprintf("Can not burn the token %s", denom))
+}
+
+func ErrCanNotBurnHolder(denom string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeCanNotBurnHolder, fmt.Sprintf("Can not burn the token %s", denom))
+}
+
+func ErrCanNotBurnFrom(denom string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeCanNotBurnFrom, fmt.Sprintf("Can not burn the token %s", denom))
+}
+
+func ErrCanNotFreeze(denom string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeCanNotFreeze, fmt.Sprintf("Can not freeze the token %s", denom))
+}
+
 //func ErrUnknownFreezeType() sdk.Error {
 //	return sdk.NewError(DefaultCodespace, CodeUnknownFreezeType, fmt.Sprintf("Unknown type"))
 //}

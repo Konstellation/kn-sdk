@@ -47,17 +47,21 @@ func getTxCmdCreate(cdc *codec.Codec) *cobra.Command {
 			}
 			totalSupply = sdk.NewIntWithDecimal(totalSupply.Int64(), cast.ToInt(decimals))
 
-			issueParams := types.IssueParams{
-				Denom:              args[0],
-				Symbol:             strings.ToUpper(args[1]),
-				TotalSupply:        totalSupply,
-				Decimals:           decimals,
-				Description:        viper.GetString(flagDescription),
+			issueFeatures := types.IssueFeatures{
 				BurnOwnerDisabled:  viper.GetBool(flagBurnOwnerDisabled),
 				BurnHolderDisabled: viper.GetBool(flagBurnHolderDisabled),
 				BurnFromDisabled:   viper.GetBool(flagBurnFromDisabled),
 				MintDisabled:       viper.GetBool(flagMintDisabled),
 				FreezeDisabled:     viper.GetBool(flagFreezeDisabled),
+			}
+
+			issueParams := types.IssueParams{
+				Denom:         args[0],
+				Symbol:        strings.ToUpper(args[1]),
+				TotalSupply:   totalSupply,
+				Decimals:      decimals,
+				Description:   viper.GetString(flagDescription),
+				IssueFeatures: issueFeatures,
 			}
 
 			msg := types.NewMsgIssueCreate(account, account, &issueParams)
