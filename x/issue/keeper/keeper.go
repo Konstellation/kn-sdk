@@ -641,9 +641,14 @@ func (k *Keeper) burn(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Co
 	for i, coin := range coins {
 		issue := k.getIssue(ctx, coin.Denom)
 
+		if issue == nil {
+			return types.ErrUnknownIssue(coin.Denom)
+		}
+
 		if issue.Owner.Equals(from) && issue.BurnOwnerDisabled {
 			return types.ErrCanNotBurnOwner(issue.Denom)
 		}
+
 		if burner.Equals(from) {
 			if issue.BurnHolderDisabled {
 				return types.ErrCanNotBurnHolder(issue.Denom)

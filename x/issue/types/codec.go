@@ -13,6 +13,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgDisableFeature{}, "issue/MsgDisableFeature", nil)
 	cdc.RegisterConcrete(MsgEnableFeature{}, "issue/MsgEnableFeature", nil)
 	cdc.RegisterConcrete(MsgFeatures{}, "issue/MsgFeatures", nil)
+	cdc.RegisterConcrete(MsgDescription{}, "issue/MsgDescription", nil)
 	cdc.RegisterConcrete(MsgTransfer{}, "issue/MsgTransfer", nil)
 	cdc.RegisterConcrete(MsgTransferFrom{}, "issue/MsgTransferFrom", nil)
 	cdc.RegisterConcrete(MsgApprove{}, "issue/MsgApprove", nil)
