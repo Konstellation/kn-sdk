@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/params/subspace"
 	"github.com/konstellation/kn-sdk/x/issue/types"
+	"strings"
 )
 
 // IssueKeeper encodes/decodes accounts using the go-amino (binary)
@@ -301,6 +302,15 @@ func (k *Keeper) CreateIssue(ctx sdk.Context, owner, issuer sdk.AccAddress, para
 }
 
 func (k *Keeper) ChangeFeatures(ctx sdk.Context, owner sdk.AccAddress, denom string, features *types.IssueFeatures) sdk.Error {
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeChangeFeatures,
+			sdk.NewAttribute(types.AttributeKeyOwner, owner.String()),
+			sdk.NewAttribute(types.AttributeKeyDenom, denom),
+			sdk.NewAttribute(types.AttributeKeyFeatures, features.String()),
+		),
+	)
+
 	i, err := k.getIssueIfOwner(ctx, denom, owner)
 	if err != nil {
 		return err
@@ -308,6 +318,28 @@ func (k *Keeper) ChangeFeatures(ctx sdk.Context, owner sdk.AccAddress, denom str
 
 	i.SetFeatures(features)
 	k.setIssue(ctx, i)
+
+	return nil
+}
+
+func (k *Keeper) ChangeDescription(ctx sdk.Context, owner sdk.AccAddress, denom string, description string) sdk.Error {
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeChangeDescription,
+			sdk.NewAttribute(types.AttributeKeyOwner, owner.String()),
+			sdk.NewAttribute(types.AttributeKeyDenom, denom),
+			sdk.NewAttribute(types.AttributeKeyDescription, description),
+		),
+	)
+
+	i, err := k.getIssueIfOwner(ctx, denom, owner)
+	if err != nil {
+		return err
+	}
+
+	i.Description = description
+	k.setIssue(ctx, i)
+
 	return nil
 }
 
@@ -439,9 +471,6 @@ func (k *Keeper) allowances(ctx sdk.Context, owner sdk.AccAddress, denom string)
 }
 
 func (k *Keeper) approve(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
-	k.setAllowance(ctx, owner, spender, amount)
-	k.setAllowances(ctx, owner, spender, amount)
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeApprove,
@@ -451,12 +480,12 @@ func (k *Keeper) approve(ctx sdk.Context, owner, spender sdk.AccAddress, amount 
 			sdk.NewAttribute(sdk.AttributeKeyAmount, amount.Amount.String()),
 		),
 	)
+
+	k.setAllowance(ctx, owner, spender, amount)
+	k.setAllowances(ctx, owner, spender, amount)
 }
 
 func (k *Keeper) increaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
-	allowance := k.allowance(ctx, owner, spender, amount.Denom)
-	k.approve(ctx, owner, spender, allowance.Add(amount))
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeIncreaseAllowance,
@@ -466,16 +495,12 @@ func (k *Keeper) increaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddres
 			sdk.NewAttribute(sdk.AttributeKeyAmount, amount.Amount.String()),
 		),
 	)
+
+	allowance := k.allowance(ctx, owner, spender, amount.Denom)
+	k.approve(ctx, owner, spender, allowance.Add(amount))
 }
 
 func (k *Keeper) decreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
-	allowance := k.allowance(ctx, owner, spender, amount.Denom)
-	if allowance.IsGTE(amount) {
-		k.approve(ctx, owner, spender, allowance.Sub(amount))
-	} else {
-		k.approve(ctx, owner, spender, sdk.NewCoin(amount.Denom, sdk.ZeroInt()))
-	}
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeDecreaseAllowance,
@@ -485,6 +510,65 @@ func (k *Keeper) decreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddres
 			sdk.NewAttribute(sdk.AttributeKeyAmount, amount.Amount.String()),
 		),
 	)
+
+	allowance := k.allowance(ctx, owner, spender, amount.Denom)
+	if allowance.IsGTE(amount) {
+		k.approve(ctx, owner, spender, allowance.Sub(amount))
+	} else {
+		k.approve(ctx, owner, spender, sdk.NewCoin(amount.Denom, sdk.ZeroInt()))
+	}
+}
+
+// ----------------------- freeze -----------------------
+
+func (k *Keeper) setFreeze(ctx sdk.Context, denom string, holder sdk.AccAddress, freeze *types.Freeze) {
+	store := ctx.KVStore(k.key)
+	bz := k.cdc.MustMarshalBinaryLengthPrefixed(freeze)
+	store.Set(KeyFreeze(denom, holder), bz)
+}
+
+func (k *Keeper) getFreeze(ctx sdk.Context, denom string, holder sdk.AccAddress) *types.Freeze {
+	store := ctx.KVStore(k.key)
+	bz := store.Get(KeyFreeze(denom, holder))
+	if len(bz) == 0 {
+		return types.NewFreeze(false, false)
+	}
+	var freeze types.Freeze
+	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &freeze)
+	return &freeze
+}
+
+func (k *Keeper) GetFreeze(ctx sdk.Context, denom string, holder sdk.AccAddress) *types.Freeze {
+	return k.getFreeze(ctx, denom, holder)
+}
+
+func (k *Keeper) GetFreezes(ctx sdk.Context, denom string) []*types.AddressFreeze {
+	store := ctx.KVStore(k.key)
+	iterator := sdk.KVStorePrefixIterator(store, PrefixFreeze(denom))
+	defer iterator.Close()
+	list := make(types.AddressFreezes, 0)
+	for ; iterator.Valid(); iterator.Next() {
+		var freeze types.Freeze
+		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &freeze)
+		keys := strings.Split(string(iterator.Key()), KeyDelimiter)
+		address := keys[len(keys)-1]
+		list = append(list, types.NewAddressFreeze(address, freeze.In, freeze.Out))
+	}
+	return list
+}
+
+func (k *Keeper) CheckFreeze(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, denom string) sdk.Error {
+	freeze := k.GetFreeze(ctx, denom, from)
+	if freeze.Out {
+		return types.ErrCanNotTransferOut(denom, from.String())
+	}
+
+	freeze = k.GetFreeze(ctx, denom, to)
+	if freeze.In {
+		return types.ErrCanNotTransferIn(denom, to.String())
+	}
+
+	return nil
 }
 
 // ----------------------- transfers -----------------------
@@ -498,10 +582,25 @@ func (k *Keeper) transfer(ctx sdk.Context, from, to sdk.AccAddress, coins sdk.Co
 		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", to))
 	}
 
+	for _, coin := range coins {
+		if err := k.CheckFreeze(ctx, from, to, coin.Denom); err != nil {
+			return err
+		}
+	}
+
 	return k.ck.SendCoins(ctx, from, to, coins)
 }
 
 func (k *Keeper) mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coins) sdk.Error {
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeMint,
+			sdk.NewAttribute(sdk.AttributeKeyAmount, coins.String()),
+			sdk.NewAttribute(types.AttributeKeyMinter, minter.String()),
+			sdk.NewAttribute(types.AttributeKeyRecipient, to.String()),
+		),
+	)
+
 	for i, coin := range coins {
 		issue, err := k.getIssueIfOwner(ctx, coin.Denom, minter)
 		if err != nil {
@@ -520,15 +619,6 @@ func (k *Keeper) mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coin
 		}
 	}
 
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeMint,
-			sdk.NewAttribute(sdk.AttributeKeyAmount, coins.String()),
-			sdk.NewAttribute(types.AttributeKeyMinter, minter.String()),
-			sdk.NewAttribute(types.AttributeKeyRecipient, to.String()),
-		),
-	)
-
 	if err := k.sk.MintCoins(ctx, types.ModuleName, coins); err != nil {
 		return err
 	}
@@ -537,6 +627,15 @@ func (k *Keeper) mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coin
 }
 
 func (k *Keeper) burn(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Coins) sdk.Error {
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeBurn,
+			sdk.NewAttribute(sdk.AttributeKeyAmount, coins.String()),
+			sdk.NewAttribute(types.AttributeKeyBurner, burner.String()),
+			sdk.NewAttribute(types.AttributeKeyFrom, from.String()),
+		),
+	)
+
 	acc := k.ak.GetAccount(ctx, from)
 
 	for i, coin := range coins {
@@ -570,28 +669,31 @@ func (k *Keeper) burn(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Co
 		return err
 	}
 
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeBurn,
-			sdk.NewAttribute(sdk.AttributeKeyAmount, coins.String()),
-			sdk.NewAttribute(types.AttributeKeyBurner, burner.String()),
-			sdk.NewAttribute(types.AttributeKeyFrom, from.String()),
-		),
-	)
-
 	return k.sk.BurnCoins(ctx, types.ModuleName, coins)
+}
+
+func (k *Keeper) freeze(ctx sdk.Context, holder sdk.AccAddress, denom, op string, freeze bool) sdk.Error {
+	f := k.getFreeze(ctx, denom, holder)
+	switch op {
+	case types.FreezeIn:
+		f.In = freeze
+	case types.FreezeOut:
+		f.Out = freeze
+	case types.FreezeInOut:
+		f.In = freeze
+		f.Out = freeze
+	default:
+		return types.ErrInvalidFreezeOp(op)
+	}
+
+	k.setFreeze(ctx, denom, holder, f)
+
+	return nil
 }
 
 // ----------------------- ERC20 -----------------------
 
 func (k *Keeper) Issue(ctx sdk.Context, issue *types.CoinIssue) sdk.Error {
-	i := k.getIssue(ctx, issue.Denom)
-	if i != nil {
-		return types.ErrIssueAlreadyExists()
-	}
-
-	k.addIssue(ctx, issue)
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeIssue,
@@ -599,6 +701,13 @@ func (k *Keeper) Issue(ctx sdk.Context, issue *types.CoinIssue) sdk.Error {
 			sdk.NewAttribute(types.AttributeKeyIssuer, issue.GetIssuer().String()),
 		),
 	)
+
+	i := k.getIssue(ctx, issue.Denom)
+	if i != nil {
+		return types.ErrIssueAlreadyExists()
+	}
+
+	k.addIssue(ctx, issue)
 
 	if err := k.sk.MintCoins(ctx, types.ModuleName, issue.ToCoins()); err != nil {
 		return err
@@ -619,15 +728,6 @@ func (k *Keeper) Transfer(ctx sdk.Context, from, to sdk.AccAddress, coins sdk.Co
 }
 
 func (k *Keeper) TransferFrom(ctx sdk.Context, sender, from, to sdk.AccAddress, coins sdk.Coins) sdk.Error {
-	for _, coin := range coins {
-		allowance := k.allowance(ctx, from, sender, coin.Denom)
-		if allowance.IsGTE(coin) {
-			k.decreaseAllowance(ctx, from, sender, coin)
-		} else {
-			return types.ErrAmountGreaterThanAllowance(coin, allowance)
-		}
-	}
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeTransferFrom,
@@ -638,10 +738,28 @@ func (k *Keeper) TransferFrom(ctx sdk.Context, sender, from, to sdk.AccAddress, 
 		),
 	)
 
+	for _, coin := range coins {
+		allowance := k.allowance(ctx, from, sender, coin.Denom)
+		if allowance.IsGTE(coin) {
+			k.decreaseAllowance(ctx, from, sender, coin)
+		} else {
+			return types.ErrAmountGreaterThanAllowance(coin, allowance)
+		}
+	}
+
 	return k.transfer(ctx, from, to, coins)
 }
 
 func (k *Keeper) TransferOwnership(ctx sdk.Context, owner, to sdk.AccAddress, denom string) sdk.Error {
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeTransferOwnership,
+			sdk.NewAttribute(types.AttributeKeyOwner, owner.String()),
+			sdk.NewAttribute(types.AttributeKeyTo, to.String()),
+			sdk.NewAttribute(types.AttributeKeyDenom, denom),
+		),
+	)
+
 	i, err := k.getIssueIfOwner(ctx, denom, owner)
 	if err != nil {
 		return err
@@ -651,15 +769,6 @@ func (k *Keeper) TransferOwnership(ctx sdk.Context, owner, to sdk.AccAddress, de
 	k.deleteAddressDenom(ctx, owner.String(), denom)
 	k.addAddressDenom(ctx, i)
 	k.setIssue(ctx, i)
-
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			types.EventTypeTransferOwnership,
-			sdk.NewAttribute(types.AttributeKeyOwner, owner.String()),
-			sdk.NewAttribute(types.AttributeKeyTo, to.String()),
-			sdk.NewAttribute(types.AttributeKeyDenom, denom),
-		),
-	)
 
 	return nil
 }
@@ -705,15 +814,6 @@ func (k *Keeper) Burn(ctx sdk.Context, burner sdk.AccAddress, coins sdk.Coins) s
 }
 
 func (k *Keeper) BurnFrom(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Coins) sdk.Error {
-	for _, coin := range coins {
-		allowance := k.allowance(ctx, from, burner, coin.Denom)
-		if allowance.IsGTE(coin) {
-			k.decreaseAllowance(ctx, from, burner, coin)
-		} else {
-			return types.ErrAmountGreaterThanAllowance(coin, allowance)
-		}
-	}
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeBurnFrom,
@@ -723,7 +823,56 @@ func (k *Keeper) BurnFrom(ctx sdk.Context, burner, from sdk.AccAddress, coins sd
 		),
 	)
 
+	for _, coin := range coins {
+		allowance := k.allowance(ctx, from, burner, coin.Denom)
+		if allowance.IsGTE(coin) {
+			k.decreaseAllowance(ctx, from, burner, coin)
+		} else {
+			return types.ErrAmountGreaterThanAllowance(coin, allowance)
+		}
+	}
+
 	return k.burn(ctx, burner, from, coins)
+}
+
+func (k *Keeper) Freeze(ctx sdk.Context, freezer, holder sdk.AccAddress, denom, op string) sdk.Error {
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeFreeze,
+			sdk.NewAttribute(types.AttributeKeyFreezer, freezer.String()),
+			sdk.NewAttribute(types.AttributeKeyHolder, holder.String()),
+			sdk.NewAttribute(types.AttributeKeyDenom, denom),
+			sdk.NewAttribute(types.AttributeKeyOp, op),
+		),
+	)
+
+	issue, err := k.getIssueIfOwner(ctx, denom, freezer)
+	if err != nil {
+		return err
+	}
+	if issue.FreezeDisabled {
+		return types.ErrCanNotFreeze(denom)
+	}
+
+	return k.freeze(ctx, holder, denom, op, true)
+}
+
+func (k *Keeper) Unfreeze(ctx sdk.Context, freezer, holder sdk.AccAddress, denom, op string) sdk.Error {
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeUnfreeze,
+			sdk.NewAttribute(types.AttributeKeyFreezer, freezer.String()),
+			sdk.NewAttribute(types.AttributeKeyHolder, holder.String()),
+			sdk.NewAttribute(types.AttributeKeyDenom, denom),
+			sdk.NewAttribute(types.AttributeKeyOp, op),
+		),
+	)
+	_, err := k.getIssueIfOwner(ctx, denom, freezer)
+	if err != nil {
+		return err
+	}
+
+	return k.freeze(ctx, holder, denom, op, false)
 }
 
 // ----------------------- fee -----------------------

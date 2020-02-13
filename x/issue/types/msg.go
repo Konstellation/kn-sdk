@@ -6,6 +6,10 @@ import (
 
 const (
 	TypeMsgIssueCreate       = "issue_create"
+	TypeMsgDescription       = "description"
+	TypeMsgDisableFeature    = "disable_feature"
+	TypeMsgEnableFeature     = "enable_feature"
+	TypeMsgFeatures          = "features"
 	TypeMsgTransfer          = "transfer"
 	TypeMsgTransferFrom      = "transfer_from"
 	TypeMsgApprove           = "approve"
@@ -15,12 +19,15 @@ const (
 	TypeMsgBurn              = "burn"
 	TypeMsgBurnFrom          = "burn_from"
 	TypeMsgTransferOwnership = "transfer_ownership"
-	TypeMsgDisableFeature    = "disable_feature"
-	TypeMsgEnableFeature     = "enable_feature"
-	TypeMsgFeatures          = "features"
+	TypeMsgFreeze            = "freeze"
+	TypeMsgUnfreeze          = "unfreeze"
 )
 
 var _ sdk.Msg = &MsgIssueCreate{}
+var _ sdk.Msg = &MsgDescription{}
+var _ sdk.Msg = &MsgDisableFeature{}
+var _ sdk.Msg = &MsgEnableFeature{}
+var _ sdk.Msg = &MsgFeatures{}
 var _ sdk.Msg = &MsgTransfer{}
 var _ sdk.Msg = &MsgApprove{}
 var _ sdk.Msg = &MsgIncreaseAllowance{}
@@ -30,9 +37,8 @@ var _ sdk.Msg = &MsgMint{}
 var _ sdk.Msg = &MsgBurn{}
 var _ sdk.Msg = &MsgBurnFrom{}
 var _ sdk.Msg = &MsgTransferOwnership{}
-var _ sdk.Msg = &MsgDisableFeature{}
-var _ sdk.Msg = &MsgEnableFeature{}
-var _ sdk.Msg = &MsgFeatures{}
+var _ sdk.Msg = &MsgFreeze{}
+var _ sdk.Msg = &MsgUnfreeze{}
 
 type MsgIssueCreate struct {
 	Owner        sdk.AccAddress `json:"owner" yaml:"owner"`
@@ -69,28 +75,66 @@ func (msg MsgIssueCreate) ValidateBasic() sdk.Error {
 		return sdk.ErrInvalidAddress("Owner address cannot be empty")
 	}
 	// Cannot issue zero or negative coins
-	//if msg.TotalSupply.IsZero() || !msg.TotalSupply.IsPositive() {
-	//	return sdk.ErrInvalidCoins("Cannot issue 0 or negative coin amounts")
-	//}
+	if msg.TotalSupply.IsZero() || !msg.TotalSupply.IsPositive() {
+		return sdk.ErrInvalidCoins("Cannot issue 0 or negative coin amounts")
+	}
 	//if utils.QuoDecimals(msg.TotalSupply, msg.Decimals).GT(CoinMaxTotalSupply) {
-	//	return errors.ErrCoinTotalSupplyMaxValueNotValid()
+	//	return ErrCoinTotalSupplyMaxValueNotValid()
 	//}
-	//if len(msg.Name) < CoinNameMinLength || len(msg.Name) > CoinNameMaxLength {
-	//	return errors.ErrCoinNamelNotValid()
-	//}
-	//if len(msg.Symbol) < CoinSymbolMinLength || len(msg.Symbol) > CoinSymbolMaxLength {
-	//	return errors.ErrCoinSymbolNotValid()
-	//}
-	//if msg.Decimals > CoinDecimalsMaxValue {
-	//	return errors.ErrCoinDecimalsMaxValueNotValid()
-	//}
-	//if msg.Decimals%CoinDecimalsMultiple != 0 {
-	//	return errors.ErrCoinDecimalsMultipleNotValid()
-	//}
-	//if len(msg.Description) > CoinDescriptionMaxLength {
-	//	return errors.ErrCoinDescriptionMaxLengthNotValid()
-	//}
+	if len(msg.Symbol) < CoinSymbolMinLength || len(msg.Symbol) > CoinSymbolMaxLength {
+		return ErrCoinSymbolNotValid()
+	}
+	if msg.Decimals > CoinDecimalsMaxValue {
+		return ErrCoinDecimalsMaxValueNotValid()
+	}
+	if msg.Decimals%CoinDecimalsMultiple != 0 {
+		return ErrCoinDecimalsMultipleNotValid()
+	}
+	if len(msg.Description) > CoinDescriptionMaxLength {
+		return ErrCoinDescriptionMaxLengthNotValid()
+	}
 	return nil
+}
+
+type MsgDescription struct {
+	Owner       sdk.AccAddress `json:"owner" yaml:"owner"`
+	Denom       string         `json:"denom" yaml:"denom"`
+	Description string         `json:"description" yaml:"description"`
+}
+
+func NewMsgDescription(owner sdk.AccAddress, denom, description string) MsgDescription {
+	return MsgDescription{Owner: owner, Denom: denom, Description: description}
+}
+
+// Route Implements Msg.
+func (msg MsgDescription) Route() string { return RouterKey }
+
+// Type Implements Msg.
+func (msg MsgDescription) Type() string { return TypeMsgDescription }
+
+// ValidateBasic Implements Msg.
+func (msg MsgDescription) ValidateBasic() sdk.Error {
+	if msg.Owner.Empty() {
+		return sdk.ErrInvalidAddress("missing owner address")
+	}
+	if msg.Denom == "" {
+		return ErrInvalidDenom(msg.Denom)
+	}
+
+	if len(msg.Description) > CoinDescriptionMaxLength {
+		return ErrCoinDescriptionMaxLengthNotValid()
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgDescription) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgDescription) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
 }
 
 type MsgDisableFeature struct {
@@ -601,4 +645,92 @@ func (msg MsgBurnFrom) GetSignBytes() []byte {
 // GetSigners Implements Msg.
 func (msg MsgBurnFrom) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Burner}
+}
+
+type MsgFreeze struct {
+	Freezer sdk.AccAddress `json:"freezer" yaml:"freezer"`
+	Holder  sdk.AccAddress `json:"holder" yaml:"holder"`
+	Denom   string         `json:"string" yaml:"string"`
+	Op      string         `json:"op" yaml:"op"`
+}
+
+func NewMsgFreeze(freezer, holder sdk.AccAddress, denom, op string) MsgFreeze {
+	return MsgFreeze{Freezer: freezer, Holder: holder, Denom: denom, Op: op}
+}
+
+// Route Implements Msg.
+func (msg MsgFreeze) Route() string { return RouterKey }
+
+// Type Implements Msg.
+func (msg MsgFreeze) Type() string { return TypeMsgFreeze }
+
+// ValidateBasic Implements Msg.
+func (msg MsgFreeze) ValidateBasic() sdk.Error {
+	if msg.Freezer.Empty() {
+		return sdk.ErrInvalidAddress("missing burner address")
+	}
+	if msg.Holder.Empty() {
+		return sdk.ErrInvalidAddress("missing recipient address")
+	}
+	if msg.Denom == "" {
+		return ErrInvalidDenom(msg.Denom)
+	}
+	if msg.Op == "" {
+		return ErrInvalidFreezeOp(msg.Op)
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgFreeze) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgFreeze) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Freezer}
+}
+
+type MsgUnfreeze struct {
+	Freezer sdk.AccAddress `json:"freezer" yaml:"freezer"`
+	Holder  sdk.AccAddress `json:"holder" yaml:"holder"`
+	Denom   string         `json:"string" yaml:"string"`
+	Op      string         `json:"op" yaml:"op"`
+}
+
+func NewMsgUnfreeze(freezer, holder sdk.AccAddress, denom, op string) MsgUnfreeze {
+	return MsgUnfreeze{Freezer: freezer, Holder: holder, Denom: denom, Op: op}
+}
+
+// Route Implements Msg.
+func (msg MsgUnfreeze) Route() string { return RouterKey }
+
+// Type Implements Msg.
+func (msg MsgUnfreeze) Type() string { return TypeMsgUnfreeze }
+
+// ValidateBasic Implements Msg.
+func (msg MsgUnfreeze) ValidateBasic() sdk.Error {
+	if msg.Freezer.Empty() {
+		return sdk.ErrInvalidAddress("missing burner address")
+	}
+	if msg.Holder.Empty() {
+		return sdk.ErrInvalidAddress("missing recipient address")
+	}
+	if msg.Denom == "" {
+		return ErrInvalidDenom(msg.Denom)
+	}
+	if msg.Op == "" {
+		return ErrInvalidFreezeOp(msg.Op)
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgUnfreeze) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgUnfreeze) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Freezer}
 }

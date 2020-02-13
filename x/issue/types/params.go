@@ -34,7 +34,7 @@ type Params struct {
 	IssueFee         sdk.Coin `json:"issue_fee"`
 	MintFee          sdk.Coin `json:"mint_fee"`
 	FreezeFee        sdk.Coin `json:"freeze_fee"`
-	UnFreezeFee      sdk.Coin `json:"unfreeze_fee"`
+	UnfreezeFee      sdk.Coin `json:"unfreeze_fee"`
 	BurnFee          sdk.Coin `json:"burn_fee"`
 	BurnFromFee      sdk.Coin `json:"burn_from_fee"`
 	TransferOwnerFee sdk.Coin `json:"transfer_owner_fee"`
@@ -46,7 +46,7 @@ func NewParams(issueFee, mintFee, freezeFee, unfreezeFee, burnFee, burnFromFee, 
 		IssueFee:         issueFee,
 		MintFee:          mintFee,
 		FreezeFee:        freezeFee,
-		UnFreezeFee:      unfreezeFee,
+		UnfreezeFee:      unfreezeFee,
 		BurnFee:          burnFee,
 		BurnFromFee:      burnFromFee,
 		TransferOwnerFee: transferOwnerFee,
@@ -66,7 +66,7 @@ func (p *Params) ParamSetPairs() subspace.ParamSetPairs {
 		{KeyIssueFee, &p.IssueFee},
 		{KeyMintFee, &p.MintFee},
 		{KeyFreezeFee, &p.FreezeFee},
-		{KeyUnFreezeFee, &p.UnFreezeFee},
+		{KeyUnFreezeFee, &p.UnfreezeFee},
 		{KeyBurnFee, &p.BurnFee},
 		{KeyBurnFromFee, &p.BurnFromFee},
 		{KeyTransferOwnerFee, &p.TransferOwnerFee},
@@ -86,7 +86,7 @@ func DefaultParams() Params {
 		IssueFee:         sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(2000)),
 		MintFee:          sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(1000)),
 		FreezeFee:        sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(2000)),
-		UnFreezeFee:      sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(2000)),
+		UnfreezeFee:      sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(2000)),
 		BurnFee:          sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(1000)),
 		BurnFromFee:      sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(1000)),
 		TransferOwnerFee: sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(20000)),
@@ -99,7 +99,7 @@ func (p Params) String() string {
   IssueFee:			%s
   MintFee:			%s
   FreezeFee:			%s
-  UnFreezeFee:			%s
+  UnfreezeFee:			%s
   BurnFee:			%s
   BurnFromFee:			%s
   TransferOwnerFee:		%s
@@ -107,7 +107,7 @@ func (p Params) String() string {
 		p.IssueFee.String(),
 		p.MintFee.String(),
 		p.FreezeFee.String(),
-		p.UnFreezeFee.String(),
+		p.UnfreezeFee.String(),
 		p.BurnFee.String(),
 		p.BurnFromFee.String(),
 		p.TransferOwnerFee.String())
@@ -148,8 +148,8 @@ func (p Params) Validate() error {
 	if p.FreezeFee.IsNegative() {
 		return ErrInvalidFreezeFee(p.FreezeFee.String())
 	}
-	if p.UnFreezeFee.IsNegative() {
-		return ErrInvalidUnfreezeFee(p.UnFreezeFee.String())
+	if p.UnfreezeFee.IsNegative() {
+		return ErrInvalidUnfreezeFee(p.UnfreezeFee.String())
 	}
 	if p.TransferOwnerFee.IsNegative() {
 		return ErrInvalidTransferOwnerFee(p.TransferOwnerFee.String())

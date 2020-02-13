@@ -33,6 +33,9 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 		getTxCmdDisableFeature(cdc),
 		getTxCmdEnableFeature(cdc),
 		getTxCmdFeatures(cdc),
+		getTxCmdDescription(cdc),
+		getTxCmdFreeze(cdc),
+		getTxCmdUnfreeze(cdc),
 	) {
 		_ = c.MarkFlagRequired(client.FlagFrom)
 		txCmd.AddCommand(c)

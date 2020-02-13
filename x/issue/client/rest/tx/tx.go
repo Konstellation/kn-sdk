@@ -60,4 +60,16 @@ func RegisterTxRoutes(cliCtx context.CLIContext, r *mux.Router) {
 		"/issue/features",
 		featuresHandlerFn(cliCtx),
 	).Methods("POST")
+	r.HandleFunc(
+		"/issue/description",
+		descriptionHandlerFn(cliCtx),
+	).Methods("POST")
+	r.HandleFunc(
+		"/issue/freeze",
+		freezeHandlerFn(cliCtx),
+	).Methods("POST")
+	r.HandleFunc(
+		"/issue/unfreeze",
+		unfreezeHandlerFn(cliCtx),
+	).Methods("POST")
 }

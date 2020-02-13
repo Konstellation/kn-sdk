@@ -30,6 +30,14 @@ func RegisterQueryRoutes(cliCtx context.CLIContext, r *mux.Router) {
 		allowancesHandlerFn(cliCtx),
 	).Methods("GET")
 	r.HandleFunc(
+		"/issue/freeze/{holder}/{denom}",
+		freezeHandlerFn(cliCtx),
+	).Methods("GET")
+	r.HandleFunc(
+		"/issue/freezes/{denom}",
+		freezesHandlerFn(cliCtx),
+	).Methods("GET")
+	r.HandleFunc(
 		"/issue/params",
 		paramsHandlerFn(cliCtx),
 	).Methods("GET")

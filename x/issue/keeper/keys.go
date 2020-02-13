@@ -12,11 +12,13 @@ var (
 	KeyFirstIssueDenom = []byte("firstIssueDenom")
 	KeyLastIssueDenom  = []byte("lastIssueDenom")
 	KeyLastIssueId     = []byte("lastIssueId")
+	KeyDelimiter       = ":"
 )
 
 //func BytesString(b []byte) string {
 //	return *(*string)(unsafe.Pointer(&b))
 //}
+
 // Key for getting a specific issuer from the store
 func KeyIssuer(denom string) []byte {
 	return []byte(fmt.Sprintf("issues:%s", denom))
@@ -37,12 +39,12 @@ func KeyAllowances(denom string, owner sdk.AccAddress) []byte {
 	return []byte(fmt.Sprintf("allowed:%s:%s", denom, owner.String()))
 }
 
-func KeyFreeze(issueID string, accAddress sdk.AccAddress) []byte {
-	return []byte(fmt.Sprintf("freeze:%s:%s", issueID, accAddress.String()))
+func KeyFreeze(denom string, accAddress sdk.AccAddress) []byte {
+	return []byte(fmt.Sprintf("freeze:%s:%s", denom, accAddress.String()))
 }
 
-func PrefixFreeze(issueID string) []byte {
-	return []byte(fmt.Sprintf("freeze:%s", issueID))
+func PrefixFreeze(denom string) []byte {
+	return []byte(fmt.Sprintf("freeze:%s", denom))
 }
 
 func KeySymbolDenom(symbol string) []byte {

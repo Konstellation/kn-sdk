@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cast"
 
@@ -13,6 +14,8 @@ const (
 	QueryIssue      = "query"
 	QueryIssues     = "list"
 	QueryIssuesAll  = "list-all"
+	QueryFreeze     = "freeze"
+	QueryFreezes    = "freezes"
 	QuerySearch     = "search"
 	QueryAllowance  = "allowance"
 	QueryAllowances = "allowances"
@@ -30,6 +33,11 @@ func NewIssueFeatures(data interface{}) (*IssueFeatures, error) {
 	var features IssueFeatures
 	err := mapstructure.Decode(data, &features)
 	return &features, err
+}
+
+func (fs *IssueFeatures) String() string {
+	f, _ := json.Marshal(fs)
+	return string(f)
 }
 
 type IssueParams struct {

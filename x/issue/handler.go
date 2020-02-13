@@ -26,6 +26,8 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handler.HandleMsgIssueCreate(ctx, k, msg)
 		case types.MsgFeatures:
 			return handler.HandleMsgFeatures(ctx, k, msg)
+		case types.MsgDescription:
+			return handler.HandleMsgDescription(ctx, k, msg)
 		case types.MsgTransfer:
 			return handler.HandleMsgTransfer(ctx, k, msg)
 		case types.MsgTransferFrom:
@@ -44,6 +46,10 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handler.HandleMsgBurnFrom(ctx, k, msg)
 		case types.MsgTransferOwnership:
 			return handler.HandleMsgTransferOwnership(ctx, k, msg)
+		case types.MsgFreeze:
+			return handler.HandleMsgFreeze(ctx, k, msg)
+		case types.MsgUnfreeze:
+			return handler.HandleMsgUnfreeze(ctx, k, msg)
 
 		default:
 			errMsg := fmt.Sprintf("unrecognized issue message type: %T", msg)
