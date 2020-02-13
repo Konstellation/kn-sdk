@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -45,7 +44,7 @@ func getTxCmdCreate(cdc *codec.Codec) *cobra.Command {
 			if !ok {
 				return fmt.Errorf("Total supply %s not a valid int, please input a valid total supply", args[2])
 			}
-			totalSupply = sdk.NewIntWithDecimal(totalSupply.Int64(), cast.ToInt(decimals))
+			//totalSupply = sdk.NewIntWithDecimal(totalSupply.Int64(), cast.ToInt(decimals))
 
 			issueFeatures := types.IssueFeatures{
 				BurnOwnerDisabled:  viper.GetBool(flagBurnOwnerDisabled),
