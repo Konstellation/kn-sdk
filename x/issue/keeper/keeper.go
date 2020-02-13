@@ -28,13 +28,13 @@ type Keeper struct {
 
 	// The reference to the Param Keeper to get and set Global Params
 	paramsKeeper params.Keeper
-	// The reference to the CoinKeeper to modify balances
 
 	ak types.AccountKeeper
+	// The reference to the CoinKeeper to modify balances
 	ck types.CoinKeeper
 	sk types.SupplyKeeper
 	// The reference to the FeeCollectionKeeper to add fee
-	//feeCollectionKeeper FeeCollectionKeeper
+	feeCollectorName string
 }
 
 // NewAccountKeeper returns a new sdk.AccountKeeper that uses go-amino to
@@ -46,19 +46,19 @@ func NewKeeper(
 	ak types.AccountKeeper,
 	ck types.CoinKeeper,
 	sk types.SupplyKeeper,
-	codespace sdk.CodespaceType,
+	feeCollectorName string,
 	paramsKeeper params.Keeper,
 	paramSpace params.Subspace) Keeper {
 
 	return Keeper{
-		key:           key,
-		cdc:           cdc,
-		paramSubspace: paramSpace.WithKeyTable(types.ParamKeyTable()),
-		codespace:     codespace,
-		paramsKeeper:  paramsKeeper,
-		ak:            ak,
-		ck:            ck,
-		sk:            sk,
+		key:              key,
+		cdc:              cdc,
+		paramSubspace:    paramSpace.WithKeyTable(types.ParamKeyTable()),
+		paramsKeeper:     paramsKeeper,
+		ak:               ak,
+		ck:               ck,
+		sk:               sk,
+		feeCollectorName: feeCollectorName,
 	}
 }
 
@@ -167,7 +167,7 @@ func (k *Keeper) setAddressDenoms(ctx sdk.Context, accAddress string, denoms []s
 	store.Set(KeyAddressDenoms(accAddress), bz)
 }
 
-func (k *Keeper) addAddressDenoms(ctx sdk.Context, issue *types.CoinIssue) {
+func (k *Keeper) addAddressDenom(ctx sdk.Context, issue *types.CoinIssue) {
 	denoms := k.getAddressDenoms(ctx, issue.GetOwner().String())
 	denoms = append(denoms, issue.GetDenom())
 	k.setAddressDenoms(ctx, issue.GetOwner().String(), denoms)
@@ -178,9 +178,14 @@ func (k *Keeper) deleteAllAddressDenoms(ctx sdk.Context, accAddress string) {
 	store.Delete(KeyAddressDenoms(accAddress))
 }
 
-func (k *Keeper) deleteAddressIssues(ctx sdk.Context, accAddress string, _ string) {
+func (k *Keeper) deleteAddressDenom(ctx sdk.Context, accAddress string, denom string) {
 	denoms := k.getAddressDenoms(ctx, accAddress)
-	//  todo delete denom from denoms
+	for i, d := range denoms {
+		if d == denom {
+			denoms = append(denoms[:i], denoms[i+1:]...)
+		}
+	}
+
 	k.setAddressDenoms(ctx, accAddress, denoms)
 }
 
@@ -271,7 +276,7 @@ func (k *Keeper) getIssueIfOwner(ctx sdk.Context, denom string, owner sdk.AccAdd
 }
 
 func (k *Keeper) addIssue(ctx sdk.Context, issue *types.CoinIssue) {
-	k.addAddressDenoms(ctx, issue)
+	k.addAddressDenom(ctx, issue)
 	k.addSymbolDenom(ctx, issue)
 	k.addIdDenom(ctx, issue)
 	k.setIssue(ctx, issue)
@@ -284,29 +289,16 @@ func (k *Keeper) setIssue(ctx sdk.Context, issue *types.CoinIssue) {
 	store.Set(KeyIssuer(issue.GetDenom()), k.GetCodec().MustMarshalBinaryLengthPrefixed(issue))
 }
 
-// allowance
-
-func (k *Keeper) setAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
-	store := ctx.KVStore(k.key)
-	bz := k.cdc.MustMarshalBinaryLengthPrefixed(amount.Amount)
-	store.Set(KeyAllowance(amount.Denom, owner, spender), bz)
+func (k *Keeper) AddIssue(ctx sdk.Context, issue *types.CoinIssue) {
+	k.addIssue(ctx, issue)
 }
 
-func (k *Keeper) setAllowances(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
-	store := ctx.KVStore(k.key)
-	allowances := make(types.Allowances, 0)
-	allowance := types.NewAllowance(amount, spender)
-	bz := store.Get(KeyAllowances(amount.Denom, owner))
-	if bz != nil {
-		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &allowances)
-	}
-	if i := allowances.ContainsI(allowance); i > -1 {
-		allowances[i] = allowance
-	} else {
-		allowances = append(allowances, allowance)
-	}
-	bz = k.cdc.MustMarshalBinaryLengthPrefixed(allowances)
-	store.Set(KeyAllowances(amount.Denom, owner), bz)
+func (k *Keeper) CreateIssue(ctx sdk.Context, owner, issuer sdk.AccAddress, params *types.IssueParams) *types.CoinIssue {
+	issue := types.NewCoinIssue(owner, issuer, params)
+	issue.SetId(k.getLastId(ctx))
+	issue.SetIssueTime(ctx.BlockHeader().Time.Unix())
+
+	return issue
 }
 
 // ----------------------- issues -----------------------
@@ -389,6 +381,29 @@ func (k *Keeper) List(ctx sdk.Context, params types.IssuesParams) types.CoinIssu
 }
 
 // ----------------------- allowance -----------------------
+
+func (k *Keeper) setAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
+	store := ctx.KVStore(k.key)
+	bz := k.cdc.MustMarshalBinaryLengthPrefixed(amount.Amount)
+	store.Set(KeyAllowance(amount.Denom, owner, spender), bz)
+}
+
+func (k *Keeper) setAllowances(ctx sdk.Context, owner, spender sdk.AccAddress, amount sdk.Coin) {
+	store := ctx.KVStore(k.key)
+	allowances := make(types.Allowances, 0)
+	allowance := types.NewAllowance(amount, spender)
+	bz := store.Get(KeyAllowances(amount.Denom, owner))
+	if bz != nil {
+		k.GetCodec().MustUnmarshalBinaryLengthPrefixed(bz, &allowances)
+	}
+	if i := allowances.ContainsI(allowance); i > -1 {
+		allowances[i] = allowance
+	} else {
+		allowances = append(allowances, allowance)
+	}
+	bz = k.cdc.MustMarshalBinaryLengthPrefixed(allowances)
+	store.Set(KeyAllowances(amount.Denom, owner), bz)
+}
 
 func (k *Keeper) allowance(ctx sdk.Context, owner, spender sdk.AccAddress, denom string) sdk.Coin {
 	store := ctx.KVStore(k.key)
@@ -543,18 +558,6 @@ func (k *Keeper) burn(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Co
 
 // ----------------------- ERC20 -----------------------
 
-func (k *Keeper) CreateIssue(ctx sdk.Context, owner, issuer sdk.AccAddress, params *types.IssueParams) *types.CoinIssue {
-	issue := types.NewCoinIssue(owner, issuer, params)
-	issue.SetId(k.getLastId(ctx))
-	issue.SetIssueTime(ctx.BlockHeader().Time.Unix())
-
-	return issue
-}
-
-func (k *Keeper) AddIssue(ctx sdk.Context, issue *types.CoinIssue) {
-	k.addIssue(ctx, issue)
-}
-
 func (k *Keeper) Issue(ctx sdk.Context, issue *types.CoinIssue) sdk.Error {
 	i := k.getIssue(ctx, issue.Denom)
 	if i != nil {
@@ -610,6 +613,29 @@ func (k *Keeper) TransferFrom(ctx sdk.Context, sender, from, to sdk.AccAddress, 
 	)
 
 	return k.transfer(ctx, from, to, coins)
+}
+
+func (k *Keeper) TransferOwnership(ctx sdk.Context, owner, to sdk.AccAddress, denom string) sdk.Error {
+	i, err := k.getIssueIfOwner(ctx, denom, owner)
+	if err != nil {
+		return err
+	}
+
+	i.Owner = to
+	k.deleteAddressDenom(ctx, owner.String(), denom)
+	k.addAddressDenom(ctx, i)
+	k.setIssue(ctx, i)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeTransferOwnership,
+			sdk.NewAttribute(types.AttributeKeyOwner, owner.String()),
+			sdk.NewAttribute(types.AttributeKeyTo, to.String()),
+			sdk.NewAttribute(types.AttributeKeyDenom, denom),
+		),
+	)
+
+	return nil
 }
 
 func (k *Keeper) Approve(ctx sdk.Context, owner, spender sdk.AccAddress, coins sdk.Coins) sdk.Error {
@@ -672,4 +698,18 @@ func (k *Keeper) BurnFrom(ctx sdk.Context, burner, from sdk.AccAddress, coins sd
 	)
 
 	return k.burn(ctx, burner, from, coins)
+}
+
+// ----------------------- fee -----------------------
+
+func (k *Keeper) ChargeFee(ctx sdk.Context, sender sdk.AccAddress, fee sdk.Coin) sdk.Error {
+	if fee.IsZero() || fee.IsNegative() {
+		return nil
+	}
+
+	if err := k.sk.SendCoinsFromAccountToModule(ctx, sender, k.feeCollectorName, sdk.NewCoins(fee)); err != nil {
+		return types.ErrNotEnoughFee()
+	}
+
+	return nil
 }

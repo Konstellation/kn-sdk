@@ -32,7 +32,5 @@ func getQueryCmdIssue(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String(flagAddress, "", "Token owner address")
-	cmd.Flags().Int32(flagLimit, 30, "Query number of issue results per page returned")
 	return cmd
 }

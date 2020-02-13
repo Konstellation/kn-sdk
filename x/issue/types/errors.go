@@ -12,11 +12,12 @@ type CodeType = sdk.CodeType
 const (
 	DefaultCodespace            sdk.CodespaceType = "issue"
 	CodeInvalidInput            CodeType          = 400
+	CodeUnknownIssue            sdk.CodeType      = 1
 	CodeIssuerMismatch          sdk.CodeType      = 2
-	CodeIssueIDNotValid         sdk.CodeType      = 3
+	CodeDenomNotValid           sdk.CodeType      = 3
 	CodeAmountLowerAllowance    sdk.CodeType      = 4
 	CodeIssueExists             sdk.CodeType      = 5
-	CodeUnknownIssue            sdk.CodeType      = 10
+	CodeNotEnoughFee            sdk.CodeType      = 6
 	CodeInvalidIssueFee         sdk.CodeType      = 401
 	CodeInvalidMintFee          sdk.CodeType      = 402
 	CodeInvalidBurnFee          sdk.CodeType      = 402
@@ -59,11 +60,10 @@ func ErrAmountGreaterThanAllowance(amt sdk.Coin, allowance sdk.Coin) sdk.Error {
 	return sdk.NewError(DefaultCodespace, CodeAmountLowerAllowance, fmt.Sprintf("Amount greater than allowance %x > %x", amt.String(), allowance.String()))
 }
 
-// Error constructors
+func ErrNotEnoughFee() sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeNotEnoughFee, fmt.Sprintf("Not enough fee"))
+}
 
-//func ErrNotEnoughFee() sdk.Error {
-//	return sdk.NewError(DefaultCodespace, CodeNotEnoughFee, fmt.Sprintf("Not enough fee"))
-//}
 //func ErrAmountNotValid(key string) sdk.Error {
 //	return sdk.NewError(DefaultCodespace, CodeAmountNotValid, "%s is not a valid amount", key)
 //}
@@ -76,9 +76,10 @@ func ErrAmountGreaterThanAllowance(amt sdk.Coin, allowance sdk.Coin) sdk.Error {
 //func ErrCoinTotalSupplyMaxValueNotValid() sdk.Error {
 //	return sdk.NewError(DefaultCodespace, CodeIssueTotalSupplyNotValid, fmt.Sprintf("Total supply max value is %s", types.CoinMaxTotalSupply.String()))
 //}
-//func ErrCoinSymbolNotValid() sdk.Error {
-//	return sdk.NewError(DefaultCodespace, CodeIssueSymbolNotValid, fmt.Sprintf("Symbol length is %d-%d character", types.CoinSymbolMinLength, types.CoinSymbolMaxLength))
-//}
+func ErrInvalidDenom(denom string) sdk.Error {
+	return sdk.NewError(DefaultCodespace, CodeDenomNotValid, fmt.Sprintf("Denom invalid %s", denom))
+}
+
 //func ErrFreezeEndTimestampNotValid() sdk.Error {
 //	return sdk.NewError(DefaultCodespace, CodeFreezeEndTimeNotValid, "end-time is not a valid timestamp")
 //}

@@ -14,6 +14,7 @@ const (
 	TypeMsgMint              = "mint"
 	TypeMsgBurn              = "burn"
 	TypeMsgBurnFrom          = "burn_from"
+	TypeMsgTransferOwnership = "transfer_ownership"
 )
 
 var _ sdk.Msg = &MsgIssueCreate{}
@@ -25,6 +26,7 @@ var _ sdk.Msg = &MsgTransferFrom{}
 var _ sdk.Msg = &MsgMint{}
 var _ sdk.Msg = &MsgBurn{}
 var _ sdk.Msg = &MsgBurnFrom{}
+var _ sdk.Msg = &MsgTransferOwnership{}
 
 type MsgIssueCreate struct {
 	Owner        sdk.AccAddress `json:"owner" yaml:"owner"`
@@ -175,6 +177,46 @@ func (msg MsgTransferFrom) GetSignBytes() []byte {
 // GetSigners Implements Msg.
 func (msg MsgTransferFrom) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Sender}
+}
+
+type MsgTransferOwnership struct {
+	Owner     sdk.AccAddress `json:"owner" yaml:"owner"`
+	ToAddress sdk.AccAddress `json:"to_address" yaml:"to_address"`
+	Denom     string         `json:"denom" yaml:"denom"`
+}
+
+func NewMsgTransferOwnership(owner, toAddr sdk.AccAddress, denom string) MsgTransferOwnership {
+	return MsgTransferOwnership{Owner: owner, ToAddress: toAddr, Denom: denom}
+}
+
+// Route Implements Msg.
+func (msg MsgTransferOwnership) Route() string { return RouterKey }
+
+// Type Implements Msg.
+func (msg MsgTransferOwnership) Type() string { return TypeMsgTransferOwnership }
+
+// ValidateBasic Implements Msg.
+func (msg MsgTransferOwnership) ValidateBasic() sdk.Error {
+	if msg.Owner.Empty() {
+		return sdk.ErrInvalidAddress("missing owner address")
+	}
+	if msg.ToAddress.Empty() {
+		return sdk.ErrInvalidAddress("missing recipient address")
+	}
+	if msg.Denom == "" {
+		return ErrInvalidDenom(msg.Denom)
+	}
+	return nil
+}
+
+// GetSignBytes Implements Msg.
+func (msg MsgTransferOwnership) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners Implements Msg.
+func (msg MsgTransferOwnership) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
 }
 
 // MsgApprove - high level transaction of the coin module

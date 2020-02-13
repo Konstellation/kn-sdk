@@ -13,9 +13,8 @@ import (
 )
 
 const (
-	flagAddress = "address"
-	flagLimit   = "limit"
-	flagSymbol  = "symbol"
+	flagOwner = "owner"
+	flagLimit = "limit"
 )
 
 // getCmdQueryIssues implements the query issue command.
@@ -27,7 +26,7 @@ func getQueryCmdIssues(cdc *codec.Codec) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			address, err := sdk.AccAddressFromBech32(viper.GetString(flagAddress))
+			address, err := sdk.AccAddressFromBech32(viper.GetString(flagOwner))
 			if err != nil {
 				return err
 			}
@@ -53,7 +52,7 @@ func getQueryCmdIssues(cdc *codec.Codec) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String(flagAddress, "", "Token owner address")
+	cmd.Flags().String(flagOwner, "", "Token owner address")
 	cmd.Flags().Int32(flagLimit, 30, "Query number of issue results per page returned")
 	return cmd
 }

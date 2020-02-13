@@ -7,14 +7,14 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgBurn(ctx sdk.Context, k keeper.Keeper, msg types.MsgBurn) sdk.Result {
+func HandleMsgTransferOwnership(ctx sdk.Context, k keeper.Keeper, msg types.MsgTransferOwnership) sdk.Result {
 	// Sub fee from sender
-	fee := k.GetParams(ctx).BurnFee
-	if err := k.ChargeFee(ctx, msg.Burner, fee); err != nil {
+	fee := k.GetParams(ctx).TransferOwnerFee
+	if err := k.ChargeFee(ctx, msg.Owner, fee); err != nil {
 		return err.Result()
 	}
 
-	if err := k.Burn(ctx, msg.Burner, msg.Amount); err != nil {
+	if err := k.TransferOwnership(ctx, msg.Owner, msg.ToAddress, msg.Denom); err != nil {
 		return err.Result()
 	}
 

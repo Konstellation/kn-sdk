@@ -8,8 +8,6 @@ import (
 )
 
 func HandleMsgIncreaseAllowance(ctx sdk.Context, k keeper.Keeper, msg types.MsgIncreaseAllowance) sdk.Result {
-	// TODO set fee
-
 	if err := k.IncreaseAllowance(ctx, msg.Owner, msg.Spender, msg.Amount); err != nil {
 		return err.Result()
 	}

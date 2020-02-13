@@ -8,11 +8,11 @@ import (
 )
 
 func HandleMsgIssueCreate(ctx sdk.Context, k keeper.Keeper, msg types.MsgIssueCreate) sdk.Result {
-	// Sub fee from sender
-	//fee := keeper.GetParams(ctx).IssueFee
-	//if err := keeper.Fee(ctx, msg.Sender, fee); err != nil {
-	//	return err.Result()
-	//}
+	// Sub fee from issuer
+	fee := k.GetParams(ctx).IssueFee
+	if err := k.ChargeFee(ctx, msg.Issuer, fee); err != nil {
+		return err.Result()
+	}
 
 	params, errr := types.NewIssueParams(msg.IssueParams)
 	if errr != nil {

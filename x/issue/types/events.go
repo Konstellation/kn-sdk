@@ -8,8 +8,8 @@ const (
 	EventTypeDecreaseAllowance = "decrease_allowance"
 	EventTypeTransfer          = "transfer"
 	EventTypeTransferFrom      = "transfer_from"
+	EventTypeTransferOwnership = "transfer_ownership"
 	EventTypeMint              = "mint"
-	EventTypeMintTo            = "mint_to"
 	EventTypeBurn              = "burn"
 	EventTypeBurnFrom          = "burn_from"
 
@@ -20,7 +20,6 @@ const (
 	AttributeKeyTo        = "to"
 	AttributeKeySpender   = "spender"
 	AttributeKeyDenom     = "denom"
-	AttributeKeyIssueId   = "issueId"
 	AttributeKeyMinter    = "minter"
 	AttributeKeyBurner    = "burner"
 
