@@ -102,8 +102,7 @@ func (p Params) String() string {
   UnfreezeFee:			%s
   BurnFee:			%s
   BurnFromFee:			%s
-  TransferOwnerFee:		%s
-  DescribeFee:			%s`,
+  TransferOwnerFee:		%s`,
 		p.IssueFee.String(),
 		p.MintFee.String(),
 		p.FreezeFee.String(),
