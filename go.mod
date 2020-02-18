@@ -4,6 +4,8 @@ go 1.13
 
 require (
 	github.com/cosmos/cosmos-sdk v0.37.0
+	github.com/ethereum/go-ethereum v1.9.11
+	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.0
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/mitchellh/mapstructure v1.1.2
