@@ -650,7 +650,7 @@ func (msg MsgBurnFrom) GetSigners() []sdk.AccAddress {
 type MsgFreeze struct {
 	Freezer sdk.AccAddress `json:"freezer" yaml:"freezer"`
 	Holder  sdk.AccAddress `json:"holder" yaml:"holder"`
-	Denom   string         `json:"string" yaml:"string"`
+	Denom   string         `json:"denom" yaml:"denom"`
 	Op      string         `json:"op" yaml:"op"`
 }
 
@@ -694,7 +694,7 @@ func (msg MsgFreeze) GetSigners() []sdk.AccAddress {
 type MsgUnfreeze struct {
 	Freezer sdk.AccAddress `json:"freezer" yaml:"freezer"`
 	Holder  sdk.AccAddress `json:"holder" yaml:"holder"`
-	Denom   string         `json:"string" yaml:"string"`
+	Denom   string         `json:"denom" yaml:"denom"`
 	Op      string         `json:"op" yaml:"op"`
 }
 
