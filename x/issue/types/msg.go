@@ -667,10 +667,10 @@ func (msg MsgFreeze) Type() string { return TypeMsgFreeze }
 // ValidateBasic Implements Msg.
 func (msg MsgFreeze) ValidateBasic() sdk.Error {
 	if msg.Freezer.Empty() {
-		return sdk.ErrInvalidAddress("missing burner address")
+		return sdk.ErrInvalidAddress("missing freezer address")
 	}
 	if msg.Holder.Empty() {
-		return sdk.ErrInvalidAddress("missing recipient address")
+		return sdk.ErrInvalidAddress("missing holder address")
 	}
 	if msg.Denom == "" {
 		return ErrInvalidDenom(msg.Denom)
@@ -711,10 +711,10 @@ func (msg MsgUnfreeze) Type() string { return TypeMsgUnfreeze }
 // ValidateBasic Implements Msg.
 func (msg MsgUnfreeze) ValidateBasic() sdk.Error {
 	if msg.Freezer.Empty() {
-		return sdk.ErrInvalidAddress("missing burner address")
+		return sdk.ErrInvalidAddress("missing freezer address")
 	}
 	if msg.Holder.Empty() {
-		return sdk.ErrInvalidAddress("missing recipient address")
+		return sdk.ErrInvalidAddress("missing holder address")
 	}
 	if msg.Denom == "" {
 		return ErrInvalidDenom(msg.Denom)
