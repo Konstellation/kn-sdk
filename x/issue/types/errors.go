@@ -72,7 +72,7 @@ func ErrOwnerMismatch(issueID string) sdk.Error {
 }
 
 func ErrAmountGreaterThanAllowance(amt sdk.Coin, allowance sdk.Coin) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeAmountLowerAllowance, fmt.Sprintf("Amount greater than allowance %x > %x", amt.String(), allowance.String()))
+	return sdk.NewError(DefaultCodespace, CodeAmountLowerAllowance, fmt.Sprintf("Amount greater than allowance %s > %s", amt.String(), allowance.String()))
 }
 
 func ErrNotEnoughFee() sdk.Error {

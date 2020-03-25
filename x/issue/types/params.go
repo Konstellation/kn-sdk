@@ -63,13 +63,13 @@ func ParamKeyTable() subspace.KeyTable {
 // nolint
 func (p *Params) ParamSetPairs() subspace.ParamSetPairs {
 	return params.ParamSetPairs{
-		{KeyIssueFee, &p.IssueFee},
-		{KeyMintFee, &p.MintFee},
-		{KeyFreezeFee, &p.FreezeFee},
-		{KeyUnFreezeFee, &p.UnfreezeFee},
-		{KeyBurnFee, &p.BurnFee},
-		{KeyBurnFromFee, &p.BurnFromFee},
-		{KeyTransferOwnerFee, &p.TransferOwnerFee},
+		{Key: KeyIssueFee, Value: &p.IssueFee},
+		{Key: KeyMintFee, Value: &p.MintFee},
+		{Key: KeyFreezeFee, Value: &p.FreezeFee},
+		{Key: KeyUnFreezeFee, Value: &p.UnfreezeFee},
+		{Key: KeyBurnFee, Value: &p.BurnFee},
+		{Key: KeyBurnFromFee, Value: &p.BurnFromFee},
+		{Key: KeyTransferOwnerFee, Value: &p.TransferOwnerFee},
 	}
 }
 
@@ -102,8 +102,7 @@ func (p Params) String() string {
   UnfreezeFee:			%s
   BurnFee:			%s
   BurnFromFee:			%s
-  TransferOwnerFee:		%s
-  DescribeFee:			%s`,
+  TransferOwnerFee:		%s`,
 		p.IssueFee.String(),
 		p.MintFee.String(),
 		p.FreezeFee.String(),

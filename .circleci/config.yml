@@ -1,0 +1,31 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+
+defaults: &build_defaults
+  working_directory: /go/src/github.com/konstellation/kn-sdk
+  docker:
+    - image: circleci/golang:1.13
+
+jobs:
+  build:
+    <<: *build_defaults
+    steps:
+      - checkout
+      - run:
+          name: run build
+          command: |
+            go build -v ./...
+      - run:
+          name: run tests
+          command: |
+            go fmt ./...
+            go vet ./...
+            go test -v ./...
+
+workflows:
+  version: 2
+  build-konstellation-sdk:
+    jobs:
+      - build

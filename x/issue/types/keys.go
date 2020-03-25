@@ -12,9 +12,9 @@ const (
 	// QuerierRoute is the querier route for acc
 	QuerierRoute = StoreKey
 
-	CoinDecimalsMaxValue                  = uint(18)
-	CoinDecimalsMultiple                  = uint(3)
-	CoinSymbolMinLength                   = 2
-	CoinSymbolMaxLength                   = 8
-	CoinDescriptionMaxLength              = 1024
+	CoinDecimalsMaxValue     = uint(18)
+	CoinDecimalsMultiple     = uint(3)
+	CoinSymbolMinLength      = 2
+	CoinSymbolMaxLength      = 8
+	CoinDescriptionMaxLength = 1024
 )
