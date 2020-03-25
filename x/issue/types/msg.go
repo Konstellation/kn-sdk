@@ -583,7 +583,7 @@ func (msg MsgBurn) Type() string { return TypeMsgBurn }
 // ValidateBasic Implements Msg.
 func (msg MsgBurn) ValidateBasic() sdk.Error {
 	if msg.Burner.Empty() {
-		return sdk.ErrInvalidAddress("missing minter address")
+		return sdk.ErrInvalidAddress("missing burner address")
 	}
 	if !msg.Amount.IsValid() {
 		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
