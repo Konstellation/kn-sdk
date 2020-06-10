@@ -1,7 +1,7 @@
 package issue
 
 import (
-	"fmt"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -10,7 +10,7 @@ import (
 )
 
 func NewHandler(k Keeper) sdk.Handler {
-	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 
 		ctx.EventManager().EmitEvent(
@@ -52,8 +52,7 @@ func NewHandler(k Keeper) sdk.Handler {
 			return handler.HandleMsgUnfreeze(ctx, k, msg)
 
 		default:
-			errMsg := fmt.Sprintf("unrecognized issue message type: %T", msg)
-			return sdk.ErrUnknownRequest(errMsg).Result()
+			return nil, sdkerrors.ErrUnknownRequest
 		}
 	}
 }

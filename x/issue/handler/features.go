@@ -7,10 +7,10 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgFeatures(ctx sdk.Context, k keeper.Keeper, msg types.MsgFeatures) sdk.Result {
+func HandleMsgFeatures(ctx sdk.Context, k keeper.Keeper, msg types.MsgFeatures) (*sdk.Result, error) {
 	if err := k.ChangeFeatures(ctx, msg.Owner, msg.Denom, msg.IssueFeatures); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

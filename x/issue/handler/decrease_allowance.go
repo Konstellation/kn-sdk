@@ -7,10 +7,10 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgDecreaseAllowance(ctx sdk.Context, k keeper.Keeper, msg types.MsgDecreaseAllowance) sdk.Result {
+func HandleMsgDecreaseAllowance(ctx sdk.Context, k keeper.Keeper, msg types.MsgDecreaseAllowance) (*sdk.Result, error) {
 	if err := k.DecreaseAllowance(ctx, msg.Owner, msg.Spender, msg.Amount); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

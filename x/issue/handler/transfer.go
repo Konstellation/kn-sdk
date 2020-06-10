@@ -7,10 +7,10 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgTransfer(ctx sdk.Context, k keeper.Keeper, msg types.MsgTransfer) sdk.Result {
+func HandleMsgTransfer(ctx sdk.Context, k keeper.Keeper, msg types.MsgTransfer) (*sdk.Result, error) {
 	if err := k.Transfer(ctx, msg.FromAddress, msg.ToAddress, msg.Amount); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

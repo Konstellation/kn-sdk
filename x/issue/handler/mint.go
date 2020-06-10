@@ -7,16 +7,16 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgMint(ctx sdk.Context, k keeper.Keeper, msg types.MsgMint) sdk.Result {
+func HandleMsgMint(ctx sdk.Context, k keeper.Keeper, msg types.MsgMint) (*sdk.Result, error) {
 	// Sub fee from sender
 	fee := k.GetParams(ctx).MintFee
 	if err := k.ChargeFee(ctx, msg.Minter, fee); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
 	if err := k.Mint(ctx, msg.Minter, msg.ToAddress, msg.Amount); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

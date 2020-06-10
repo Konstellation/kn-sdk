@@ -7,16 +7,16 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgUnfreeze(ctx sdk.Context, k keeper.Keeper, msg types.MsgUnfreeze) sdk.Result {
+func HandleMsgUnfreeze(ctx sdk.Context, k keeper.Keeper, msg types.MsgUnfreeze) (*sdk.Result, error) {
 	// Sub fee from sender
 	fee := k.GetParams(ctx).UnfreezeFee
 	if err := k.ChargeFee(ctx, msg.Freezer, fee); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
 	if err := k.Unfreeze(ctx, msg.Freezer, msg.Holder, msg.Denom, msg.Op); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

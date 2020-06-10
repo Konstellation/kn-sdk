@@ -7,22 +7,22 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgIssueCreate(ctx sdk.Context, k keeper.Keeper, msg types.MsgIssueCreate) sdk.Result {
+func HandleMsgIssueCreate(ctx sdk.Context, k keeper.Keeper, msg types.MsgIssueCreate) (*sdk.Result, error) {
 	// Sub fee from issuer
 	fee := k.GetParams(ctx).IssueFee
 	if err := k.ChargeFee(ctx, msg.Issuer, fee); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
 	params, errr := types.NewIssueParams(msg.IssueParams)
 	if errr != nil {
-		return types.ErrInvalidIssueParams().Result()
+		return nil, types.ErrInvalidIssueParams
 	}
 
 	ci := k.CreateIssue(ctx, msg.Owner, msg.Issuer, params)
 	if err := k.Issue(ctx, ci); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

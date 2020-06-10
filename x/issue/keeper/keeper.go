@@ -1,9 +1,9 @@
 package keeper
 
 import (
-	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/params/subspace"
@@ -22,9 +22,6 @@ type Keeper struct {
 
 	// The reference to the Paramstore to get and set issue specific params
 	paramSubspace subspace.Subspace
-
-	// Reserved codespace
-	codespace sdk.CodespaceType
 
 	// The reference to the Param Keeper to get and set Global Params
 	paramsKeeper params.Keeper
@@ -249,27 +246,27 @@ func (k *Keeper) getIssue(ctx sdk.Context, denom string) *types.CoinIssue {
 	return &coinIssue
 }
 
-func (k *Keeper) GetIssue(ctx sdk.Context, denom string) (*types.CoinIssue, sdk.Error) {
+func (k *Keeper) GetIssue(ctx sdk.Context, denom string) (*types.CoinIssue, error) {
 	issue := k.getIssue(ctx, denom)
 	if issue == nil {
-		return nil, types.ErrUnknownIssue(denom)
+		return nil, types.ErrUnknownIssue
 	}
 
 	return issue, nil
 }
 
-func (k *Keeper) checkOwner(_ sdk.Context, issue *types.CoinIssue, owner sdk.AccAddress) (*types.CoinIssue, sdk.Error) {
+func (k *Keeper) checkOwner(_ sdk.Context, issue *types.CoinIssue, owner sdk.AccAddress) (*types.CoinIssue, error) {
 	if !issue.Owner.Equals(owner) {
-		return nil, types.ErrOwnerMismatch(issue.Denom)
+		return nil, types.ErrOwnerMismatch
 	}
 
 	return issue, nil
 }
 
-func (k *Keeper) getIssueIfOwner(ctx sdk.Context, denom string, owner sdk.AccAddress) (*types.CoinIssue, sdk.Error) {
+func (k *Keeper) getIssueIfOwner(ctx sdk.Context, denom string, owner sdk.AccAddress) (*types.CoinIssue, error) {
 	issue := k.getIssue(ctx, denom)
 	if issue == nil {
-		return nil, types.ErrUnknownIssue(denom)
+		return nil, types.ErrUnknownIssue
 	}
 
 	return k.checkOwner(ctx, issue, owner)
@@ -301,7 +298,7 @@ func (k *Keeper) CreateIssue(ctx sdk.Context, owner, issuer sdk.AccAddress, para
 	return issue
 }
 
-func (k *Keeper) ChangeFeatures(ctx sdk.Context, owner sdk.AccAddress, denom string, features *types.IssueFeatures) sdk.Error {
+func (k *Keeper) ChangeFeatures(ctx sdk.Context, owner sdk.AccAddress, denom string, features *types.IssueFeatures) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeChangeFeatures,
@@ -322,7 +319,7 @@ func (k *Keeper) ChangeFeatures(ctx sdk.Context, owner sdk.AccAddress, denom str
 	return nil
 }
 
-func (k *Keeper) ChangeDescription(ctx sdk.Context, owner sdk.AccAddress, denom string, description string) sdk.Error {
+func (k *Keeper) ChangeDescription(ctx sdk.Context, owner sdk.AccAddress, denom string, description string) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeChangeDescription,
@@ -557,15 +554,15 @@ func (k *Keeper) GetFreezes(ctx sdk.Context, denom string) []*types.AddressFreez
 	return list
 }
 
-func (k *Keeper) CheckFreeze(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, denom string) sdk.Error {
+func (k *Keeper) CheckFreeze(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, denom string) error {
 	freeze := k.GetFreeze(ctx, denom, from)
 	if freeze.Out {
-		return types.ErrCanNotTransferOut(denom, from.String())
+		return types.ErrCannotTransferOut(from.String())
 	}
 
 	freeze = k.GetFreeze(ctx, denom, to)
 	if freeze.In {
-		return types.ErrCanNotTransferIn(denom, to.String())
+		return types.ErrCannotTransferIn(to.String())
 	}
 
 	return nil
@@ -573,13 +570,14 @@ func (k *Keeper) CheckFreeze(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAdd
 
 // ----------------------- transfers -----------------------
 
-func (k *Keeper) transfer(ctx sdk.Context, from, to sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) transfer(ctx sdk.Context, from, to sdk.AccAddress, coins sdk.Coins) error {
 	if !k.ck.GetSendEnabled(ctx) {
-		return bank.ErrSendDisabled(k.codespace)
+		return bank.ErrSendDisabled
 	}
 
 	if k.ck.BlacklistedAddr(to) {
-		return sdk.ErrUnauthorized(fmt.Sprintf("%s is not allowed to receive transactions", to))
+		//(fmt.Sprintf("%s is not allowed to receive transactions", to)
+		return sdkerrors.ErrUnauthorized
 	}
 
 	for _, coin := range coins {
@@ -591,7 +589,7 @@ func (k *Keeper) transfer(ctx sdk.Context, from, to sdk.AccAddress, coins sdk.Co
 	return k.ck.SendCoins(ctx, from, to, coins)
 }
 
-func (k *Keeper) mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coins) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeMint,
@@ -614,7 +612,7 @@ func (k *Keeper) mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coin
 
 		if issue != nil {
 			if issue.MintDisabled {
-				return types.ErrCanNotMint(issue.Denom)
+				return types.ErrCannotMint
 			}
 		}
 	}
@@ -626,7 +624,7 @@ func (k *Keeper) mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coin
 	return k.sk.SendCoinsFromModuleToAccount(ctx, types.ModuleName, to, coins)
 }
 
-func (k *Keeper) burn(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) burn(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Coins) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeBurn,
@@ -642,20 +640,20 @@ func (k *Keeper) burn(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Co
 		issue := k.getIssue(ctx, coin.Denom)
 
 		if issue == nil {
-			return types.ErrUnknownIssue(coin.Denom)
+			return types.ErrUnknownIssue
 		}
 
 		if issue.Owner.Equals(from) && issue.BurnOwnerDisabled {
-			return types.ErrCanNotBurnOwner(issue.Denom)
+			return types.ErrCannotBurnOwner
 		}
 
 		if burner.Equals(from) {
 			if issue.BurnHolderDisabled {
-				return types.ErrCanNotBurnHolder(issue.Denom)
+				return types.ErrCannotBurnHolder
 			}
 		} else {
 			if issue.BurnFromDisabled {
-				return types.ErrCanNotBurnFrom(issue.Denom)
+				return types.ErrCannotBurnFrom
 			}
 		}
 
@@ -677,7 +675,7 @@ func (k *Keeper) burn(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Co
 	return k.sk.BurnCoins(ctx, types.ModuleName, coins)
 }
 
-func (k *Keeper) freeze(ctx sdk.Context, holder sdk.AccAddress, denom, op string, freeze bool) sdk.Error {
+func (k *Keeper) freeze(ctx sdk.Context, holder sdk.AccAddress, denom, op string, freeze bool) error {
 	f := k.getFreeze(ctx, denom, holder)
 	switch op {
 	case types.FreezeIn:
@@ -698,7 +696,7 @@ func (k *Keeper) freeze(ctx sdk.Context, holder sdk.AccAddress, denom, op string
 
 // ----------------------- ERC20 -----------------------
 
-func (k *Keeper) Issue(ctx sdk.Context, issue *types.CoinIssue) sdk.Error {
+func (k *Keeper) Issue(ctx sdk.Context, issue *types.CoinIssue) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeIssue,
@@ -709,7 +707,7 @@ func (k *Keeper) Issue(ctx sdk.Context, issue *types.CoinIssue) sdk.Error {
 
 	i := k.getIssue(ctx, issue.Denom)
 	if i != nil {
-		return types.ErrIssueAlreadyExists()
+		return types.ErrIssueAlreadyExists
 	}
 
 	k.addIssue(ctx, issue)
@@ -721,7 +719,7 @@ func (k *Keeper) Issue(ctx sdk.Context, issue *types.CoinIssue) sdk.Error {
 	return k.sk.SendCoinsFromModuleToAccount(ctx, types.ModuleName, issue.GetOwner(), issue.ToCoins())
 }
 
-func (k *Keeper) Transfer(ctx sdk.Context, from, to sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) Transfer(ctx sdk.Context, from, to sdk.AccAddress, coins sdk.Coins) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeTransfer,
@@ -732,7 +730,7 @@ func (k *Keeper) Transfer(ctx sdk.Context, from, to sdk.AccAddress, coins sdk.Co
 	return k.transfer(ctx, from, to, coins)
 }
 
-func (k *Keeper) TransferFrom(ctx sdk.Context, sender, from, to sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) TransferFrom(ctx sdk.Context, sender, from, to sdk.AccAddress, coins sdk.Coins) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeTransferFrom,
@@ -755,7 +753,7 @@ func (k *Keeper) TransferFrom(ctx sdk.Context, sender, from, to sdk.AccAddress, 
 	return k.transfer(ctx, from, to, coins)
 }
 
-func (k *Keeper) TransferOwnership(ctx sdk.Context, owner, to sdk.AccAddress, denom string) sdk.Error {
+func (k *Keeper) TransferOwnership(ctx sdk.Context, owner, to sdk.AccAddress, denom string) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeTransferOwnership,
@@ -778,7 +776,7 @@ func (k *Keeper) TransferOwnership(ctx sdk.Context, owner, to sdk.AccAddress, de
 	return nil
 }
 
-func (k *Keeper) Approve(ctx sdk.Context, owner, spender sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) Approve(ctx sdk.Context, owner, spender sdk.AccAddress, coins sdk.Coins) error {
 	for _, coin := range coins {
 		k.approve(ctx, owner, spender, coin)
 	}
@@ -794,7 +792,7 @@ func (k *Keeper) Allowances(ctx sdk.Context, owner sdk.AccAddress, denom string)
 	return k.allowances(ctx, owner, denom)
 }
 
-func (k *Keeper) IncreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) IncreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, coins sdk.Coins) error {
 	for _, coin := range coins {
 		k.increaseAllowance(ctx, owner, spender, coin)
 	}
@@ -802,7 +800,7 @@ func (k *Keeper) IncreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddres
 	return nil
 }
 
-func (k *Keeper) DecreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) DecreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddress, coins sdk.Coins) error {
 	for _, coin := range coins {
 		k.decreaseAllowance(ctx, owner, spender, coin)
 	}
@@ -810,15 +808,15 @@ func (k *Keeper) DecreaseAllowance(ctx sdk.Context, owner, spender sdk.AccAddres
 	return nil
 }
 
-func (k *Keeper) Mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) Mint(ctx sdk.Context, minter, to sdk.AccAddress, coins sdk.Coins) error {
 	return k.mint(ctx, minter, to, coins)
 }
 
-func (k *Keeper) Burn(ctx sdk.Context, burner sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) Burn(ctx sdk.Context, burner sdk.AccAddress, coins sdk.Coins) error {
 	return k.burn(ctx, burner, burner, coins)
 }
 
-func (k *Keeper) BurnFrom(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Coins) sdk.Error {
+func (k *Keeper) BurnFrom(ctx sdk.Context, burner, from sdk.AccAddress, coins sdk.Coins) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeBurnFrom,
@@ -840,7 +838,7 @@ func (k *Keeper) BurnFrom(ctx sdk.Context, burner, from sdk.AccAddress, coins sd
 	return k.burn(ctx, burner, from, coins)
 }
 
-func (k *Keeper) Freeze(ctx sdk.Context, freezer, holder sdk.AccAddress, denom, op string) sdk.Error {
+func (k *Keeper) Freeze(ctx sdk.Context, freezer, holder sdk.AccAddress, denom, op string) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeFreeze,
@@ -856,13 +854,13 @@ func (k *Keeper) Freeze(ctx sdk.Context, freezer, holder sdk.AccAddress, denom, 
 		return err
 	}
 	if issue.FreezeDisabled {
-		return types.ErrCanNotFreeze(denom)
+		return types.ErrCannotFreeze
 	}
 
 	return k.freeze(ctx, holder, denom, op, true)
 }
 
-func (k *Keeper) Unfreeze(ctx sdk.Context, freezer, holder sdk.AccAddress, denom, op string) sdk.Error {
+func (k *Keeper) Unfreeze(ctx sdk.Context, freezer, holder sdk.AccAddress, denom, op string) error {
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeUnfreeze,
@@ -882,13 +880,13 @@ func (k *Keeper) Unfreeze(ctx sdk.Context, freezer, holder sdk.AccAddress, denom
 
 // ----------------------- fee -----------------------
 
-func (k *Keeper) ChargeFee(ctx sdk.Context, sender sdk.AccAddress, fee sdk.Coin) sdk.Error {
+func (k *Keeper) ChargeFee(ctx sdk.Context, sender sdk.AccAddress, fee sdk.Coin) error {
 	if fee.IsZero() || fee.IsNegative() {
 		return nil
 	}
 
 	if err := k.sk.SendCoinsFromAccountToModule(ctx, sender, k.feeCollectorName, sdk.NewCoins(fee)); err != nil {
-		return types.ErrNotEnoughFee()
+		return types.ErrNotEnoughFee
 	}
 
 	return nil

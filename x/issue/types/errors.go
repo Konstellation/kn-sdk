@@ -5,183 +5,199 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
-
-type CodeType = sdk.CodeType
 
 const (
-	DefaultCodespace            sdk.CodespaceType = "issue"
-	CodeInvalidGenesis          sdk.CodeType      = 102
-	CodeUnknownIssue            sdk.CodeType      = 1
-	CodeIssuerMismatch          sdk.CodeType      = 2
-	CodeInvalidDenom            sdk.CodeType      = 3
-	CodeAmountLowerAllowance    sdk.CodeType      = 4
-	CodeIssueExists             sdk.CodeType      = 5
-	CodeNotEnoughFee            sdk.CodeType      = 6
-	CodeInvalidFeature          sdk.CodeType      = 7
-	CodeCanNotMint              sdk.CodeType      = 8
-	CodeCanNotBurnOwner         sdk.CodeType      = 9
-	CodeCanNotBurnHolder        sdk.CodeType      = 10
-	CodeCanNotBurnFrom          sdk.CodeType      = 11
-	CodeCanNotFreeze            sdk.CodeType      = 12
-	CodeAmountNotValid          sdk.CodeType      = 13
-	CodeInvalidCoinDecimals     sdk.CodeType      = 14
-	CodeInvalidTotalSupply      sdk.CodeType      = 15
-	CodeInvalidDescription      sdk.CodeType      = 16
-	CodeInvalidSymbol           sdk.CodeType      = 17
-	CodeInvalidFreezeOp         sdk.CodeType      = 18
-	CodeNotTransferOut          sdk.CodeType      = 19
-	CodeNotTransferIn           sdk.CodeType      = 20
-	CodeInvalidInput            sdk.CodeType      = 400
-	CodeInvalidIssueFee         sdk.CodeType      = 401
-	CodeInvalidMintFee          sdk.CodeType      = 402
-	CodeInvalidBurnFee          sdk.CodeType      = 402
-	CodeInvalidBurnFromFee      sdk.CodeType      = 403
-	CodeInvalidFreezeFee        sdk.CodeType      = 404
-	CodeInvalidUnFreezeFee      sdk.CodeType      = 405
-	CodeInvalidTransferOwnerFee sdk.CodeType      = 406
+	DefaultCodespace                   = "issue"
+	CodeUnknownIssue            uint32 = 1
+	CodeIssueExists             uint32 = 2
+	CodeOwnerMismatch           uint32 = 3
+	CodeInvalidOwnerAddress     uint32 = 4
+	CodeInvalidDenom            uint32 = 5
+	CodeInvalidAmount           uint32 = 6
+	CodeInvalidCoinDecimals     uint32 = 7
+	CodeInvalidTotalSupply      uint32 = 8
+	CodeInvalidDescription      uint32 = 9
+	CodeInvalidSymbol           uint32 = 10
+	CodeInvalidFreezeOp         uint32 = 11
+	CodeInvalidFeature          uint32 = 12
+	CodeInvalidInput            uint32 = 13
+	CodeInvalidIssueFee         uint32 = 14
+	CodeInvalidMintFee          uint32 = 15
+	CodeInvalidBurnFee          uint32 = 16
+	CodeInvalidBurnFromFee      uint32 = 17
+	CodeInvalidFreezeFee        uint32 = 18
+	CodeInvalidUnFreezeFee      uint32 = 19
+	CodeInvalidTransferOwnerFee uint32 = 20
+	CodeInvalidSenderAddress    uint32 = 21
+	CodeInvalidRecipientAddress uint32 = 22
+	CodeInvalidFromAddress      uint32 = 23
+	CodeInvalidSpenderAddress   uint32 = 24
+	CodeInvalidMinterAddress    uint32 = 25
+	CodeInvalidBurnerAddress    uint32 = 26
+	CodeInvalidFreezerAddress   uint32 = 27
+	CodeInvalidHolderAddress    uint32 = 28
+
+	CodeAmountLowerAllowance uint32 = 21
+	CodeNotEnoughFee         uint32 = 22
+	CodeCannotMint           uint32 = 23
+	CodeCannotBurnOwner      uint32 = 24
+	CodeCannotBurnHolder     uint32 = 25
+	CodeCannotBurnFrom       uint32 = 26
+	CodeCannotFreeze         uint32 = 27
+	CodeNotTransferOut       uint32 = 28
+	CodeNotTransferIn        uint32 = 29
 )
 
-//convert sdk.Error to error
-func Errorf(err sdk.Error) error {
-	return fmt.Errorf(err.Stacktrace().Error())
+var (
+	// ErrInvalidIssueParams to doc
+	ErrInvalidIssueParams = sdkerrors.Register(DefaultCodespace, CodeInvalidInput, "invalid issue params")
+
+	// ErrIssueAlreadyExists to doc
+	ErrIssueAlreadyExists = sdkerrors.Register(DefaultCodespace, CodeIssueExists, "issue already exists")
+
+	// ErrUnknownIssue to doc
+	ErrUnknownIssue = sdkerrors.Register(DefaultCodespace, CodeUnknownIssue, "invalid issue denom")
+
+	// ErrInvalidOwnerAddress to doc
+	ErrInvalidOwnerAddress = sdkerrors.Register(DefaultCodespace, CodeInvalidOwnerAddress, "invalid owner address")
+
+	// ErrInvalidSenderAddress to doc
+	ErrInvalidSenderAddress = sdkerrors.Register(DefaultCodespace, CodeInvalidSenderAddress, "invalid sender address")
+
+	// ErrInvalidRecipientAddress to doc
+	ErrInvalidRecipientAddress = sdkerrors.Register(DefaultCodespace, CodeInvalidRecipientAddress, "invalid recipient address")
+
+	// ErrInvalidFromAddress to doc
+	ErrInvalidFromAddress = sdkerrors.Register(DefaultCodespace, CodeInvalidFromAddress, "invalid from address")
+
+	// ErrInvalidSpenderAddress to doc
+	ErrInvalidSpenderAddress = sdkerrors.Register(DefaultCodespace, CodeInvalidSpenderAddress, "invalid spender address")
+
+	// ErrInvalidMinterAddress to doc
+	ErrInvalidMinterAddress = sdkerrors.Register(DefaultCodespace, CodeInvalidMinterAddress, "invalid minter address")
+
+	// ErrInvalidBurnerAddress to doc
+	ErrInvalidBurnerAddress = sdkerrors.Register(DefaultCodespace, CodeInvalidBurnerAddress, "invalid burner address")
+
+	// ErrInvalidFreezerAddress to doc
+	ErrInvalidFreezerAddress = sdkerrors.Register(DefaultCodespace, CodeInvalidFreezerAddress, "invalid freezer address")
+
+	// ErrInvalidHolderAddress to doc
+	ErrInvalidHolderAddress = sdkerrors.Register(DefaultCodespace, CodeInvalidHolderAddress, "invalid holder address")
+
+	// ErrOwnerMismatch to doc
+	ErrOwnerMismatch = sdkerrors.Register(DefaultCodespace, CodeOwnerMismatch, "owner mismatch with token")
+
+	// ErrNotEnoughFee to doc
+	ErrNotEnoughFee = sdkerrors.Register(DefaultCodespace, CodeNotEnoughFee, "not enough fee")
+
+	// ErrCoinDecimalsMaxValueNotValid to doc
+	ErrCoinDecimalsMaxValueNotValid = sdkerrors.Register(DefaultCodespace, CodeInvalidCoinDecimals, fmt.Sprintf("decimals max value is %d", CoinDecimalsMaxValue))
+
+	// ErrCoinDecimalsMultipleNotValid to doc
+	ErrCoinDecimalsMultipleNotValid = sdkerrors.Register(DefaultCodespace, CodeInvalidCoinDecimals, fmt.Sprintf("decimals must be a multiple of %d", CoinDecimalsMultiple))
+
+	// ErrCoinTotalSupplyMaxValueNotValid to doc
+	ErrCoinTotalSupplyMaxValueNotValid = sdkerrors.Register(DefaultCodespace, CodeInvalidTotalSupply, fmt.Sprintf("total supply max value is %s", CoinMaxTotalSupply.String()))
+
+	// ErrCoinDescriptionNotValid to doc
+	ErrCoinDescriptionNotValid = sdkerrors.Register(DefaultCodespace, CodeInvalidDescription, "description is not valid json")
+
+	// ErrCoinDescriptionMaxLengthNotValid to doc
+	ErrCoinDescriptionMaxLengthNotValid = sdkerrors.Register(DefaultCodespace, CodeInvalidDescription, fmt.Sprintf("Description max length is %d", CoinDescriptionMaxLength))
+
+	// ErrInvalidSymbol to doc
+	ErrInvalidSymbol = sdkerrors.Register(DefaultCodespace, CodeInvalidSymbol, "invalid symbol")
+
+	// ErrCannotMint to doc
+	ErrCannotMint = sdkerrors.Register(DefaultCodespace, CodeCannotMint, "cannot mint")
+
+	// ErrCannotBurnOwner to doc
+	ErrCannotBurnOwner = sdkerrors.Register(DefaultCodespace, CodeCannotBurnOwner, "cannot burn with owner")
+
+	// ErrCannotBurnHolder to doc
+	ErrCannotBurnHolder = sdkerrors.Register(DefaultCodespace, CodeCannotBurnHolder, "cannot burn with holder")
+
+	// ErrCannotBurnFrom to doc
+	ErrCannotBurnFrom = sdkerrors.Register(DefaultCodespace, CodeCannotBurnFrom, "cannot burn from")
+
+	// ErrCannotFreeze to doc
+	ErrCannotFreeze = sdkerrors.Register(DefaultCodespace, CodeCannotFreeze, "cannot freeze")
+)
+
+// ErrCoinDecimalsMultipleNotValid to doc
+func ErrAmountGreaterThanAllowance(amt sdk.Coin, allowance sdk.Coin) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeAmountLowerAllowance, fmt.Sprintf("amount greater than allowance %s > %s", amt.String(), allowance.String()))
 }
 
-//func ErrNil(codespace sdk.CodespaceType) sdk.Error {
-//	return sdk.NewError(codespace, CodeInvalidInput, "is nil")
-//}
-//
-//func ErrNilOwner(codespace sdk.CodespaceType) sdk.Error {
-//	return sdk.NewError(codespace, CodeInvalidInput, "Owner is nil")
-//}
-
-func ErrInvalidIssueParams() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidInput, "Invalid issue params")
+// ErrInvalidAmount to doc
+func ErrInvalidAmount(amount string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidAmount, fmt.Sprintf("%s is not a valid amount", amount))
 }
 
-func ErrIssueAlreadyExists() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeIssueExists, "Issue already exists")
+// ErrInvalidTotalSupply to doc
+func ErrInvalidTotalSupply(amount string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidTotalSupply, fmt.Sprintf("total supply invalid %s", amount))
 }
 
-func ErrUnknownIssue(denom string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeUnknownIssue, fmt.Sprintf("Unknown issue %s", denom))
+// ErrCoinDecimalsMultipleNotValid to doc
+func ErrInvalidDenom(denom string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidDenom, fmt.Sprintf("denom invalid %s", denom))
 }
 
-func ErrOwnerMismatch(issueID string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeIssuerMismatch, fmt.Sprintf("Owner mismatch with token %s", issueID))
+// ErrCoinDecimalsMultipleNotValid to doc
+func ErrInvalidFreezeOp(op string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidFreezeOp, fmt.Sprintf("invalid freeze type %s", op))
 }
 
-func ErrAmountGreaterThanAllowance(amt sdk.Coin, allowance sdk.Coin) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeAmountLowerAllowance, fmt.Sprintf("Amount greater than allowance %s > %s", amt.String(), allowance.String()))
+// ErrInvalidFeature to doc
+func ErrInvalidFeature(feature string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidFeature, fmt.Sprintf("feature invalid %s", feature))
 }
 
-func ErrNotEnoughFee() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeNotEnoughFee, fmt.Sprintf("Not enough fee"))
+// ErrCannotTransferIn to doc
+func ErrCannotTransferIn(accAddress string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeNotTransferIn, fmt.Sprintf("can not transfer in to %s", accAddress))
 }
 
-func ErrAmountNotValid(key string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeAmountNotValid, "%s is not a valid amount", key)
+// ErrCannotTransferOut to doc
+func ErrCannotTransferOut(accAddress string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeNotTransferOut, fmt.Sprintf("can not transfer out from %s", accAddress))
 }
 
-func ErrCoinDecimalsMaxValueNotValid() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidCoinDecimals, fmt.Sprintf("Decimals max value is %d", CoinDecimalsMaxValue))
+// ErrInvalidIssueFee to doc
+func ErrInvalidIssueFee(fee string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidIssueFee, fmt.Sprintf("invalid issue fee: %s", fee))
 }
 
-func ErrCoinDecimalsMultipleNotValid() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidCoinDecimals, fmt.Sprintf("Decimals must be a multiple of %d", CoinDecimalsMultiple))
+// ErrInvalidMintFee to doc
+func ErrInvalidMintFee(fee string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidMintFee, fmt.Sprintf("invalid mint fee: %s", fee))
 }
 
-func ErrCoinTotalSupplyMaxValueNotValid() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidTotalSupply, fmt.Sprintf("Total supply max value is %s", CoinMaxTotalSupply.String()))
+// ErrInvalidBurnFee to doc
+func ErrInvalidBurnFee(fee string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidBurnFee, fmt.Sprintf("invalid burn fee: %s", fee))
 }
 
-func ErrInvalidDenom(denom string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidDenom, fmt.Sprintf("Denom invalid %s", denom))
+// ErrInvalidBurnFromFee to doc
+func ErrInvalidBurnFromFee(fee string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidBurnFromFee, fmt.Sprintf("invalid burn from fee: %s", fee))
 }
 
-func ErrInvalidFreezeOp(op string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidFreezeOp, fmt.Sprintf("Invalid freeze type %s", op))
+// ErrInvalidFreezeFee to doc
+func ErrInvalidFreezeFee(fee string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidFreezeFee, fmt.Sprintf("invalid freeze fee: %s", fee))
 }
 
-func ErrInvalidFeature(feature string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidFeature, fmt.Sprintf("Feature invalid %s", feature))
+// ErrInvalidUnfreezeFee to doc
+func ErrInvalidUnfreezeFee(fee string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidUnFreezeFee, fmt.Sprintf("invalid unfreeze fee: %s", fee))
 }
 
-//func ErrUnknownFeatures() sdk.Error {
-//	return sdk.NewError(DefaultCodespace, CodeUnknownFeature, fmt.Sprintf("Unknown feature"))
-//}
-
-//func ErrFreezeEndTimestampNotValid() sdk.Error {
-//	return sdk.NewError(DefaultCodespace, CodeFreezeEndTimeNotValid, "end-time is not a valid timestamp")
-//}
-func ErrCoinDescriptionNotValid() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidDescription, "Description is not valid json")
-}
-
-func ErrCoinDescriptionMaxLengthNotValid() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidDescription, "Description max length is %d", CoinDescriptionMaxLength)
-}
-
-func ErrCoinSymbolNotValid() sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidSymbol, "Invalid symbol")
-}
-
-func ErrCanNotMint(denom string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeCanNotMint, fmt.Sprintf("Can not mint the token %s", denom))
-}
-
-func ErrCanNotBurnOwner(denom string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeCanNotBurnOwner, fmt.Sprintf("Can not burn the token %s", denom))
-}
-
-func ErrCanNotBurnHolder(denom string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeCanNotBurnHolder, fmt.Sprintf("Can not burn the token %s", denom))
-}
-
-func ErrCanNotBurnFrom(denom string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeCanNotBurnFrom, fmt.Sprintf("Can not burn the token %s", denom))
-}
-
-func ErrCanNotFreeze(denom string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeCanNotFreeze, fmt.Sprintf("Can not freeze the token %s", denom))
-}
-
-//func ErrNotEnoughAmountToTransfer() sdk.Error {
-//	return sdk.NewError(DefaultCodespace, CodeNotEnoughAmountToTransfer, fmt.Sprintf("Not enough amount allowed to transfer"))
-//}
-
-func ErrCanNotTransferIn(denom string, accAddress string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeNotTransferIn, fmt.Sprintf("Can not transfer in %s to %s", denom, accAddress))
-}
-
-func ErrCanNotTransferOut(denom string, accAddress string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeNotTransferOut, fmt.Sprintf("Can not transfer out %s from %s", denom, accAddress))
-}
-
-func ErrInvalidIssueFee(fee string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidIssueFee, fmt.Sprintf("invalid issue fee: %s", fee))
-}
-
-func ErrInvalidMintFee(fee string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidMintFee, fmt.Sprintf("invalid mint fee: %s", fee))
-}
-
-func ErrInvalidBurnFee(fee string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidBurnFee, fmt.Sprintf("invalid burn fee: %s", fee))
-}
-
-func ErrInvalidBurnFromFee(fee string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidBurnFromFee, fmt.Sprintf("invalid burn from fee: %s", fee))
-}
-
-func ErrInvalidFreezeFee(fee string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidFreezeFee, fmt.Sprintf("invalid freeze fee: %s", fee))
-}
-
-func ErrInvalidUnfreezeFee(fee string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidUnFreezeFee, fmt.Sprintf("invalid unfreeze fee: %s", fee))
-}
-
-func ErrInvalidTransferOwnerFee(fee string) sdk.Error {
-	return sdk.NewError(DefaultCodespace, CodeInvalidTransferOwnerFee, fmt.Sprintf("invalid transfer owner fee: %s", fee))
+// ErrInvalidTransferOwnerFee to doc
+func ErrInvalidTransferOwnerFee(fee string) *sdkerrors.Error {
+	return sdkerrors.New(DefaultCodespace, CodeInvalidTransferOwnerFee, fmt.Sprintf("invalid transfer owner fee: %s", fee))
 }

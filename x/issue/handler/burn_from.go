@@ -7,16 +7,16 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgBurnFrom(ctx sdk.Context, k keeper.Keeper, msg types.MsgBurnFrom) sdk.Result {
+func HandleMsgBurnFrom(ctx sdk.Context, k keeper.Keeper, msg types.MsgBurnFrom) (*sdk.Result, error) {
 	// Sub fee from sender
 	fee := k.GetParams(ctx).BurnFromFee
 	if err := k.ChargeFee(ctx, msg.Burner, fee); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
 	if err := k.BurnFrom(ctx, msg.Burner, msg.FromAddress, msg.Amount); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

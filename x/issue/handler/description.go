@@ -7,10 +7,10 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgDescription(ctx sdk.Context, k keeper.Keeper, msg types.MsgDescription) sdk.Result {
+func HandleMsgDescription(ctx sdk.Context, k keeper.Keeper, msg types.MsgDescription) (*sdk.Result, error) {
 	if err := k.ChangeDescription(ctx, msg.Owner, msg.Denom, msg.Description); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }

@@ -69,29 +69,29 @@ func (msg MsgIssueCreate) GetSignBytes() []byte {
 }
 
 // quick validity check
-func (msg MsgIssueCreate) ValidateBasic() sdk.Error {
+func (msg MsgIssueCreate) ValidateBasic() error {
 	if msg.Owner.Empty() {
 		//return ErrNilOwner(DefaultCodespace)
-		return sdk.ErrInvalidAddress("Owner address cannot be empty")
+		return ErrInvalidOwnerAddress
 	}
 	// Cannot issue zero or negative coins
 	if msg.TotalSupply.IsZero() || !msg.TotalSupply.IsPositive() {
-		return sdk.ErrInvalidCoins("Cannot issue 0 or negative coin amounts")
+		return ErrInvalidAmount("Cannot issue 0 or negative coin amounts")
 	}
 	//if utils.QuoDecimals(msg.TotalSupply, msg.Decimals).GT(CoinMaxTotalSupply) {
 	//	return ErrCoinTotalSupplyMaxValueNotValid()
 	//}
 	if len(msg.Symbol) < CoinSymbolMinLength || len(msg.Symbol) > CoinSymbolMaxLength {
-		return ErrCoinSymbolNotValid()
+		return ErrInvalidSymbol
 	}
 	if msg.Decimals > CoinDecimalsMaxValue {
-		return ErrCoinDecimalsMaxValueNotValid()
+		return ErrCoinDecimalsMaxValueNotValid
 	}
 	if msg.Decimals%CoinDecimalsMultiple != 0 {
-		return ErrCoinDecimalsMultipleNotValid()
+		return ErrCoinDecimalsMultipleNotValid
 	}
 	if len(msg.Description) > CoinDescriptionMaxLength {
-		return ErrCoinDescriptionMaxLengthNotValid()
+		return ErrCoinDescriptionMaxLengthNotValid
 	}
 	return nil
 }
@@ -113,16 +113,16 @@ func (msg MsgDescription) Route() string { return RouterKey }
 func (msg MsgDescription) Type() string { return TypeMsgDescription }
 
 // ValidateBasic Implements Msg.
-func (msg MsgDescription) ValidateBasic() sdk.Error {
+func (msg MsgDescription) ValidateBasic() error {
 	if msg.Owner.Empty() {
-		return sdk.ErrInvalidAddress("missing owner address")
+		return ErrInvalidOwnerAddress
 	}
 	if msg.Denom == "" {
 		return ErrInvalidDenom(msg.Denom)
 	}
 
 	if len(msg.Description) > CoinDescriptionMaxLength {
-		return ErrCoinDescriptionMaxLengthNotValid()
+		return ErrCoinDescriptionMaxLengthNotValid
 	}
 	return nil
 }
@@ -154,9 +154,9 @@ func (msg MsgDisableFeature) Route() string { return RouterKey }
 func (msg MsgDisableFeature) Type() string { return TypeMsgDisableFeature }
 
 // ValidateBasic Implements Msg.
-func (msg MsgDisableFeature) ValidateBasic() sdk.Error {
+func (msg MsgDisableFeature) ValidateBasic() error {
 	if msg.Owner.Empty() {
-		return sdk.ErrInvalidAddress("missing owner address")
+		return ErrInvalidOwnerAddress
 	}
 
 	if msg.Denom == "" {
@@ -195,9 +195,9 @@ func (msg MsgEnableFeature) Route() string { return RouterKey }
 func (msg MsgEnableFeature) Type() string { return TypeMsgEnableFeature }
 
 // ValidateBasic Implements Msg.
-func (msg MsgEnableFeature) ValidateBasic() sdk.Error {
+func (msg MsgEnableFeature) ValidateBasic() error {
 	if msg.Owner.Empty() {
-		return sdk.ErrInvalidAddress("missing owner address")
+		return ErrInvalidOwnerAddress
 	}
 	if msg.Denom == "" {
 		return ErrInvalidDenom(msg.Denom)
@@ -247,9 +247,9 @@ func (msg MsgFeatures) GetSignBytes() []byte {
 }
 
 // quick validity check
-func (msg MsgFeatures) ValidateBasic() sdk.Error {
+func (msg MsgFeatures) ValidateBasic() error {
 	if msg.Owner.Empty() {
-		return sdk.ErrInvalidAddress("Owner address cannot be empty")
+		return ErrInvalidOwnerAddress
 	}
 	if msg.Denom == "" {
 		return ErrInvalidDenom(msg.Denom)
@@ -276,18 +276,15 @@ func (msg MsgTransfer) Route() string { return RouterKey }
 func (msg MsgTransfer) Type() string { return TypeMsgTransfer }
 
 // ValidateBasic Implements Msg.
-func (msg MsgTransfer) ValidateBasic() sdk.Error {
+func (msg MsgTransfer) ValidateBasic() error {
 	if msg.FromAddress.Empty() {
-		return sdk.ErrInvalidAddress("missing sender address")
+		return ErrInvalidSenderAddress
 	}
 	if msg.ToAddress.Empty() {
-		return sdk.ErrInvalidAddress("missing recipient address")
+		return ErrInvalidRecipientAddress
 	}
-	if !msg.Amount.IsValid() {
-		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("send amount must be positive")
+	if !msg.Amount.IsValid() || !msg.Amount.IsAllPositive() {
+		return ErrInvalidAmount(msg.Amount.String())
 	}
 	return nil
 }
@@ -320,21 +317,18 @@ func (msg MsgTransferFrom) Route() string { return RouterKey }
 func (msg MsgTransferFrom) Type() string { return TypeMsgTransferFrom }
 
 // ValidateBasic Implements Msg.
-func (msg MsgTransferFrom) ValidateBasic() sdk.Error {
+func (msg MsgTransferFrom) ValidateBasic() error {
 	if msg.Sender.Empty() {
-		return sdk.ErrInvalidAddress("missing sender address")
+		return ErrInvalidSenderAddress
 	}
 	if msg.FromAddress.Empty() {
-		return sdk.ErrInvalidAddress("missing from address")
+		return ErrInvalidFromAddress
 	}
 	if msg.ToAddress.Empty() {
-		return sdk.ErrInvalidAddress("missing recipient address")
+		return ErrInvalidRecipientAddress
 	}
-	if !msg.Amount.IsValid() {
-		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("send amount must be positive")
+	if !msg.Amount.IsValid() || !msg.Amount.IsAllPositive() {
+		return ErrInvalidAmount(msg.Amount.String())
 	}
 	return nil
 }
@@ -366,12 +360,12 @@ func (msg MsgTransferOwnership) Route() string { return RouterKey }
 func (msg MsgTransferOwnership) Type() string { return TypeMsgTransferOwnership }
 
 // ValidateBasic Implements Msg.
-func (msg MsgTransferOwnership) ValidateBasic() sdk.Error {
+func (msg MsgTransferOwnership) ValidateBasic() error {
 	if msg.Owner.Empty() {
-		return sdk.ErrInvalidAddress("missing owner address")
+		return ErrInvalidOwnerAddress
 	}
 	if msg.ToAddress.Empty() {
-		return sdk.ErrInvalidAddress("missing recipient address")
+		return ErrInvalidRecipientAddress
 	}
 	if msg.Denom == "" {
 		return ErrInvalidDenom(msg.Denom)
@@ -408,18 +402,15 @@ func (msg MsgApprove) Route() string { return RouterKey }
 func (msg MsgApprove) Type() string { return TypeMsgApprove }
 
 // ValidateBasic Implements Msg.
-func (msg MsgApprove) ValidateBasic() sdk.Error {
+func (msg MsgApprove) ValidateBasic() error {
 	if msg.Owner.Empty() {
-		return sdk.ErrInvalidAddress("missing owner address")
+		return ErrInvalidOwnerAddress
 	}
 	if msg.Spender.Empty() {
-		return sdk.ErrInvalidAddress("missing spender address")
+		return ErrInvalidSpenderAddress
 	}
-	if !msg.Amount.IsValid() {
-		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("send amount must be positive")
+	if !msg.Amount.IsValid() || !msg.Amount.IsAllPositive() {
+		return ErrInvalidAmount(msg.Amount.String())
 	}
 	return nil
 }
@@ -451,18 +442,15 @@ func (msg MsgIncreaseAllowance) Route() string { return RouterKey }
 func (msg MsgIncreaseAllowance) Type() string { return TypeMsgIncreaseAllowance }
 
 // ValidateBasic Implements Msg.
-func (msg MsgIncreaseAllowance) ValidateBasic() sdk.Error {
+func (msg MsgIncreaseAllowance) ValidateBasic() error {
 	if msg.Owner.Empty() {
-		return sdk.ErrInvalidAddress("missing owner address")
+		return ErrInvalidOwnerAddress
 	}
 	if msg.Spender.Empty() {
-		return sdk.ErrInvalidAddress("missing spender address")
+		return ErrInvalidSpenderAddress
 	}
-	if !msg.Amount.IsValid() {
-		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("send amount must be positive")
+	if !msg.Amount.IsValid() || !msg.Amount.IsAllPositive() {
+		return ErrInvalidAmount(msg.Amount.String())
 	}
 	return nil
 }
@@ -496,18 +484,15 @@ func (msg MsgDecreaseAllowance) Route() string { return RouterKey }
 func (msg MsgDecreaseAllowance) Type() string { return TypeMsgDecreaseAllowance }
 
 // ValidateBasic Implements Msg.
-func (msg MsgDecreaseAllowance) ValidateBasic() sdk.Error {
+func (msg MsgDecreaseAllowance) ValidateBasic() error {
 	if msg.Owner.Empty() {
-		return sdk.ErrInvalidAddress("missing owner address")
+		return ErrInvalidOwnerAddress
 	}
 	if msg.Spender.Empty() {
-		return sdk.ErrInvalidAddress("missing spender address")
+		return ErrInvalidSpenderAddress
 	}
-	if !msg.Amount.IsValid() {
-		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("send amount must be positive")
+	if !msg.Amount.IsValid() || !msg.Amount.IsAllPositive() {
+		return ErrInvalidAmount(msg.Amount.String())
 	}
 	return nil
 }
@@ -539,18 +524,15 @@ func (msg MsgMint) Route() string { return RouterKey }
 func (msg MsgMint) Type() string { return TypeMsgMint }
 
 // ValidateBasic Implements Msg.
-func (msg MsgMint) ValidateBasic() sdk.Error {
+func (msg MsgMint) ValidateBasic() error {
 	if msg.Minter.Empty() {
-		return sdk.ErrInvalidAddress("missing minter address")
+		return ErrInvalidMinterAddress
 	}
 	if msg.ToAddress.Empty() {
-		return sdk.ErrInvalidAddress("missing recipient address")
+		return ErrInvalidRecipientAddress
 	}
-	if !msg.Amount.IsValid() {
-		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("send amount must be positive")
+	if !msg.Amount.IsValid() || !msg.Amount.IsAllPositive() {
+		return ErrInvalidAmount(msg.Amount.String())
 	}
 	return nil
 }
@@ -581,15 +563,12 @@ func (msg MsgBurn) Route() string { return RouterKey }
 func (msg MsgBurn) Type() string { return TypeMsgBurn }
 
 // ValidateBasic Implements Msg.
-func (msg MsgBurn) ValidateBasic() sdk.Error {
+func (msg MsgBurn) ValidateBasic() error {
 	if msg.Burner.Empty() {
-		return sdk.ErrInvalidAddress("missing burner address")
+		return ErrInvalidBurnerAddress
 	}
-	if !msg.Amount.IsValid() {
-		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("send amount must be positive")
+	if !msg.Amount.IsValid() || !msg.Amount.IsAllPositive() {
+		return ErrInvalidAmount(msg.Amount.String())
 	}
 	return nil
 }
@@ -621,18 +600,15 @@ func (msg MsgBurnFrom) Route() string { return RouterKey }
 func (msg MsgBurnFrom) Type() string { return TypeMsgBurnFrom }
 
 // ValidateBasic Implements Msg.
-func (msg MsgBurnFrom) ValidateBasic() sdk.Error {
+func (msg MsgBurnFrom) ValidateBasic() error {
 	if msg.Burner.Empty() {
-		return sdk.ErrInvalidAddress("missing burner address")
+		return ErrInvalidBurnerAddress
 	}
 	if msg.FromAddress.Empty() {
-		return sdk.ErrInvalidAddress("missing recipient address")
+		return ErrInvalidFromAddress
 	}
-	if !msg.Amount.IsValid() {
-		return sdk.ErrInvalidCoins("send amount is invalid: " + msg.Amount.String())
-	}
-	if !msg.Amount.IsAllPositive() {
-		return sdk.ErrInsufficientCoins("send amount must be positive")
+	if !msg.Amount.IsValid() || !msg.Amount.IsAllPositive() {
+		return ErrInvalidAmount(msg.Amount.String())
 	}
 	return nil
 }
@@ -665,12 +641,12 @@ func (msg MsgFreeze) Route() string { return RouterKey }
 func (msg MsgFreeze) Type() string { return TypeMsgFreeze }
 
 // ValidateBasic Implements Msg.
-func (msg MsgFreeze) ValidateBasic() sdk.Error {
+func (msg MsgFreeze) ValidateBasic() error {
 	if msg.Freezer.Empty() {
-		return sdk.ErrInvalidAddress("missing freezer address")
+		return ErrInvalidFreezerAddress
 	}
 	if msg.Holder.Empty() {
-		return sdk.ErrInvalidAddress("missing holder address")
+		return ErrInvalidHolderAddress
 	}
 	if msg.Denom == "" {
 		return ErrInvalidDenom(msg.Denom)
@@ -709,12 +685,12 @@ func (msg MsgUnfreeze) Route() string { return RouterKey }
 func (msg MsgUnfreeze) Type() string { return TypeMsgUnfreeze }
 
 // ValidateBasic Implements Msg.
-func (msg MsgUnfreeze) ValidateBasic() sdk.Error {
+func (msg MsgUnfreeze) ValidateBasic() error {
 	if msg.Freezer.Empty() {
-		return sdk.ErrInvalidAddress("missing freezer address")
+		return ErrInvalidFreezerAddress
 	}
 	if msg.Holder.Empty() {
-		return sdk.ErrInvalidAddress("missing holder address")
+		return ErrInvalidHolderAddress
 	}
 	if msg.Denom == "" {
 		return ErrInvalidDenom(msg.Denom)

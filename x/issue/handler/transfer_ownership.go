@@ -7,16 +7,16 @@ import (
 	"github.com/konstellation/kn-sdk/x/issue/types"
 )
 
-func HandleMsgTransferOwnership(ctx sdk.Context, k keeper.Keeper, msg types.MsgTransferOwnership) sdk.Result {
+func HandleMsgTransferOwnership(ctx sdk.Context, k keeper.Keeper, msg types.MsgTransferOwnership) (*sdk.Result, error) {
 	// Sub fee from sender
 	fee := k.GetParams(ctx).TransferOwnerFee
 	if err := k.ChargeFee(ctx, msg.Owner, fee); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
 	if err := k.TransferOwnership(ctx, msg.Owner, msg.ToAddress, msg.Denom); err != nil {
-		return err.Result()
+		return nil, err
 	}
 
-	return sdk.Result{Events: ctx.EventManager().Events()}
+	return &sdk.Result{Events: ctx.EventManager().Events()}, nil
 }
