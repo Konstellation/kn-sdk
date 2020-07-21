@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"bufio"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -19,7 +20,8 @@ func getTxCmdDescription(cdc *codec.Codec) *cobra.Command {
 		Short: "Change issue's description",
 		Long:  "Change issue's description",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			denom := args[0]

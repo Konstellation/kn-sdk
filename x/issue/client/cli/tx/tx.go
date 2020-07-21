@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -19,7 +20,9 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	for _, c := range client.PostCommands(
+	txCmd.MarkFlagRequired(flags.FlagFrom)
+
+	txCmd.AddCommand(flags.PostCommands(
 		getTxCmdCreate(cdc),
 		getTxCmdTransfer(cdc),
 		getTxCmdApprove(cdc),
@@ -36,10 +39,7 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 		getTxCmdDescription(cdc),
 		getTxCmdFreeze(cdc),
 		getTxCmdUnfreeze(cdc),
-	) {
-		_ = c.MarkFlagRequired(client.FlagFrom)
-		txCmd.AddCommand(c)
-	}
+	)...)
 
 	return txCmd
 }

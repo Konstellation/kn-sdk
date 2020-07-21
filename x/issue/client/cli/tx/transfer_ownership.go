@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"bufio"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -20,7 +21,8 @@ func getTxCmdTransferOwnership(cdc *codec.Codec) *cobra.Command {
 		Short: "Transfer ownership of token",
 		Long:  "Transfers token from one owner to another",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			toAddr, err := sdk.AccAddressFromBech32(args[0])

@@ -1,6 +1,7 @@
 package issue
 
 import (
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,7 +13,7 @@ import (
 
 // NewQuerier creates a querier for auth REST endpoints
 func NewQuerier(k keeper.Keeper) sdk.Querier {
-	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
+	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, error) {
 		switch path[0] {
 		case types.QueryIssue:
 			return query.Issue(ctx, k, path[1])
@@ -31,7 +32,7 @@ func NewQuerier(k keeper.Keeper) sdk.Querier {
 		case types.QueryParams:
 			return query.Params(ctx, k)
 		default:
-			return nil, sdk.ErrUnknownRequest("unknown issue query endpoint")
+			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown %s query endpoint: %s", types.ModuleName, path[0])
 		}
 	}
 }

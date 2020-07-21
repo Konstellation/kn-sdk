@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"bufio"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -20,7 +21,8 @@ func getTxCmdDisableFeature(cdc *codec.Codec) *cobra.Command {
 		Short: "Disable feature",
 		Long:  "Disable feature for token",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			denom := args[0]

@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"bufio"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -20,7 +21,8 @@ func getTxCmdBurnFrom(cdc *codec.Codec) *cobra.Command {
 		Short: "Burn tokens from recipient",
 		Long:  "Burn tokens from recipient",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			from, err := sdk.AccAddressFromBech32(args[0])

@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"bufio"
 	"fmt"
 	"strings"
 
@@ -35,7 +36,8 @@ func getTxCmdCreate(cdc *codec.Codec) *cobra.Command {
 		Long:    "Issue a new token",
 		Example: "$ konstellationcli issue create foocoin FOO 100000000 --from foo",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := auth.NewTxBuilderFromCLI(inBuf).WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			account := cliCtx.GetFromAddress()
 
