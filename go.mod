@@ -1,6 +1,6 @@
 module github.com/konstellation/kn-sdk
 
-go 1.13
+go 1.14
 
 require (
 	github.com/cosmos/cosmos-sdk v0.37.13

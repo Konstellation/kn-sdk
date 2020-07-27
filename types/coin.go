@@ -13,9 +13,9 @@ const (
 	FDARC = "fdarc" // 10^-15 (femto)
 	ADARC = "adarc" // 10^-18 (atto)
 
-	DefaultBondDenom      = DARC
-	StakeDenom            = DARC
-	DefaultConsensusPower = 100
+	DefaultBondDenom      = UDARC
+	StakeDenom            = UDARC
+	DefaultConsensusPower = 100000
 )
 
 func RegisterNativeCoinUnits() {
