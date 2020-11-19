@@ -83,13 +83,13 @@ func (p Params) Equal(p2 Params) bool {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		IssueFee:         sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(2000)),
-		MintFee:          sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(1000)),
-		FreezeFee:        sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(2000)),
-		UnfreezeFee:      sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(2000)),
-		BurnFee:          sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(1000)),
-		BurnFromFee:      sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(1000)),
-		TransferOwnerFee: sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(20000)),
+		IssueFee:         sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(200000000)),
+		MintFee:          sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(100000000)),
+		FreezeFee:        sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(200000000)),
+		UnfreezeFee:      sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(200000000)),
+		BurnFee:          sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(100000000)),
+		BurnFromFee:      sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(100000000)),
+		TransferOwnerFee: sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(200000000)),
 	}
 }
 

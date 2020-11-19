@@ -3,7 +3,7 @@ module github.com/konstellation/kn-sdk
 go 1.14
 
 require (
-	github.com/cosmos/cosmos-sdk v0.37.13
+	github.com/cosmos/cosmos-sdk v0.37.14
 	github.com/ethereum/go-ethereum v1.9.11
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.0
@@ -18,7 +18,7 @@ require (
 	github.com/spf13/cast v1.3.0
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.6.1
-	github.com/tendermint/tendermint v0.32.12
+	github.com/tendermint/tendermint v0.32.13
 	golang.org/x/crypto v0.0.0-20190404164418-38d8ce5564a5 // indirect
 	golang.org/x/net v0.0.0-20190912160710-24e19bdeb0f2 // indirect
 	golang.org/x/sys v0.0.0-20190912141932-bc967efca4b8 // indirect
