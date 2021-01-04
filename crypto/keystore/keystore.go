@@ -2,6 +2,8 @@ package keystore
 
 import (
 	"encoding/json"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/tendermint/tendermint/crypto"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/google/uuid"
@@ -14,22 +16,32 @@ const (
 )
 
 type keyStore struct {
-	Address string              `json:"address"`
-	Crypto  keystore.CryptoJSON `json:"crypto"`
-	Id      string              `json:"id"`
-	Version int                 `json:"version"`
+	PublicKey string              `json:"public_key"`
+	Address   string              `json:"address"`
+	Crypto    keystore.CryptoJSON `json:"crypto"`
+	Id        string              `json:"id"`
+	Name      string              `json:"name"`
+	Version   int                 `json:"version"`
 }
 
-func NewKeyStoreV3(address string, data []byte, encryptPassword []byte) ([]byte, error) {
-	cryptoStruct, err := keystore.EncryptDataV3(data, encryptPassword, scryptN, scryptP)
+func NewKeyStoreV3(pk crypto.PrivKey, name string, encryptPassword []byte) ([]byte, error) {
+	pubkey, err := sdk.Bech32ifyAccPub(pk.PubKey())
+	if err != nil {
+		return nil, err
+	}
+
+	address := sdk.AccAddress(pk.PubKey().Address()).String()
+	cryptoStruct, err := keystore.EncryptDataV3(pk.Bytes(), encryptPassword, scryptN, scryptP)
 	if err != nil {
 		return nil, err
 	}
 
 	return json.Marshal(keyStore{
+		pubkey,
 		address,
 		cryptoStruct,
 		uuid.New().String(),
+		name,
 		version,
 	})
 }
