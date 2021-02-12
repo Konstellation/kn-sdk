@@ -2,14 +2,13 @@ package types
 
 import (
 	"encoding/json"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 )
 
 // GenesisUpdater is the standard form for an application module
 type GenesisUpdater interface {
 	Name() string
-	UpdateGenesis(cdc *codec.Codec, appState map[string]json.RawMessage)
+	UpdateGenesis(cdc codec.JSONMarshaler, appState map[string]json.RawMessage)
 }
 
 // collections of GenesisUpdater

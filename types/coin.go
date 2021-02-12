@@ -22,8 +22,9 @@ func RegisterNativeCoinUnits() {
 	_ = sdk.RegisterDenom(DARC, sdk.OneDec())
 	_ = sdk.RegisterDenom(MDARC, sdk.NewDecWithPrec(1, 3))
 	_ = sdk.RegisterDenom(UDARC, sdk.NewDecWithPrec(1, 6))
-	_ = sdk.RegisterDenom(NDARC, sdk.NewDecWithPrec(1, 9))
-	_ = sdk.RegisterDenom(PDARC, sdk.NewDecWithPrec(1, 12))
-	_ = sdk.RegisterDenom(FDARC, sdk.NewDecWithPrec(1, 15))
-	_ = sdk.RegisterDenom(ADARC, sdk.NewDecWithPrec(1, 18))
+	// Base denom is darc
+	//_ = sdk.RegisterDenom(NDARC, sdk.NewDecWithPrec(1, 9))
+	//_ = sdk.RegisterDenom(PDARC, sdk.NewDecWithPrec(1, 12))
+	//_ = sdk.RegisterDenom(FDARC, sdk.NewDecWithPrec(1, 15))
+	//_ = sdk.RegisterDenom(ADARC, sdk.NewDecWithPrec(1, 18))
 }
