@@ -2,16 +2,15 @@ package staking
 
 import (
 	"encoding/json"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/konstellation/kn-sdk/types"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-
-	"github.com/konstellation/kn-sdk/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 const (
-	ModuleName    = staking.ModuleName
+	ModuleName    = stakingtypes.ModuleName
 	UnbondingTime = 60 * 10 * time.Second
 )
 
@@ -24,8 +23,8 @@ func (GenesisUpdater) Name() string {
 }
 
 // UpdateGenesis returns genesis state after changes as raw bytes for the staking module.
-func (GenesisUpdater) UpdateGenesis(cdc *codec.Codec, appState map[string]json.RawMessage) {
-	var genesisState staking.GenesisState
+func (GenesisUpdater) UpdateGenesis(cdc codec.JSONMarshaler, appState map[string]json.RawMessage) {
+	var genesisState stakingtypes.GenesisState
 	err := cdc.UnmarshalJSON(appState[ModuleName], &genesisState)
 	if err != nil {
 		panic(err)
@@ -33,10 +32,10 @@ func (GenesisUpdater) UpdateGenesis(cdc *codec.Codec, appState map[string]json.R
 
 	updateGenesisParams(&genesisState)
 
-	appState[ModuleName] = cdc.MustMarshalJSON(genesisState)
+	appState[ModuleName] = cdc.MustMarshalJSON(&genesisState)
 }
 
-func updateGenesisParams(genesisState *staking.GenesisState) {
+func updateGenesisParams(genesisState *stakingtypes.GenesisState) {
 	genesisState.Params.BondDenom = types.DefaultBondDenom
 	genesisState.Params.UnbondingTime = UnbondingTime
 }

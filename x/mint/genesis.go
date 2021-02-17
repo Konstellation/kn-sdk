@@ -2,15 +2,14 @@ package mint
 
 import (
 	"encoding/json"
+	"github.com/konstellation/kn-sdk/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/mint"
-
-	"github.com/konstellation/kn-sdk/types"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 )
 
 const (
-	ModuleName = mint.ModuleName
+	ModuleName = minttypes.ModuleName
 )
 
 // GenesisUpdater implements an genesis updater for the mint module.
@@ -22,8 +21,8 @@ func (GenesisUpdater) Name() string {
 }
 
 // UpdateGenesis returns genesis state after changes as raw bytes for the mint module.
-func (GenesisUpdater) UpdateGenesis(cdc *codec.Codec, appState map[string]json.RawMessage) {
-	var genesisState mint.GenesisState
+func (GenesisUpdater) UpdateGenesis(cdc codec.JSONMarshaler, appState map[string]json.RawMessage) {
+	var genesisState minttypes.GenesisState
 	err := cdc.UnmarshalJSON(appState[ModuleName], &genesisState)
 	if err != nil {
 		panic(err)
@@ -31,9 +30,9 @@ func (GenesisUpdater) UpdateGenesis(cdc *codec.Codec, appState map[string]json.R
 
 	updateGenesisParams(&genesisState)
 
-	appState[ModuleName] = cdc.MustMarshalJSON(genesisState)
+	appState[ModuleName] = cdc.MustMarshalJSON(&genesisState)
 }
 
-func updateGenesisParams(genesisState *mint.GenesisState) {
+func updateGenesisParams(genesisState *minttypes.GenesisState) {
 	genesisState.Params.MintDenom = types.DefaultBondDenom
 }

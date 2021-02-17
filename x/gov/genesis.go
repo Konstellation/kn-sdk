@@ -5,13 +5,13 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/gov"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/konstellation/kn-sdk/types"
 )
 
 const (
-	ModuleName       = gov.ModuleName
+	ModuleName       = govtypes.ModuleName
 	MinDepositTokens = 1000
 )
 
@@ -24,8 +24,8 @@ func (GenesisUpdater) Name() string {
 }
 
 // UpdateGenesis returns genesis state after changes as raw bytes for the gov module.
-func (GenesisUpdater) UpdateGenesis(cdc *codec.Codec, appState map[string]json.RawMessage) {
-	var genesisState gov.GenesisState
+func (GenesisUpdater) UpdateGenesis(cdc codec.JSONMarshaler, appState map[string]json.RawMessage) {
+	var genesisState govtypes.GenesisState
 	err := cdc.UnmarshalJSON(appState[ModuleName], &genesisState)
 	if err != nil {
 		panic(err)
@@ -33,12 +33,12 @@ func (GenesisUpdater) UpdateGenesis(cdc *codec.Codec, appState map[string]json.R
 
 	updateGenesisParams(&genesisState)
 
-	appState[ModuleName] = cdc.MustMarshalJSON(genesisState)
+	appState[ModuleName] = cdc.MustMarshalJSON(&genesisState)
 }
 
-func updateGenesisParams(genesisState *gov.GenesisState) {
-	genesisState.DepositParams = gov.DepositParams{
+func updateGenesisParams(genesisState *govtypes.GenesisState) {
+	genesisState.DepositParams = govtypes.DepositParams{
 		MinDeposit:       sdk.Coins{sdk.NewCoin(types.DefaultBondDenom, sdk.NewInt(MinDepositTokens))},
-		MaxDepositPeriod: gov.DefaultPeriod,
+		MaxDepositPeriod: govtypes.DefaultPeriod,
 	}
 }
