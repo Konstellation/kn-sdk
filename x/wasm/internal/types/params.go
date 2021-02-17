@@ -19,7 +19,7 @@ const (
 	DefaultMaxWasmCodeSize = 600 * 1024
 )
 
-var ParamStoreKeyUploadAccess = []byte("uploadAccess")
+var ParamStoreKeyUploadAccess = []byte("codeUploadAccess")
 var ParamStoreKeyInstantiateAccess = []byte("instantiateAccess")
 var ParamStoreKeyMaxWasmCodeSize = []byte("maxWasmCodeSize")
 
