@@ -1,23 +1,22 @@
 package utils
 
 import (
+	os2 "github.com/tendermint/tendermint/libs/os"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"github.com/tendermint/tendermint/libs/common"
 )
 
 func WriteFile(name string, dir string, contents []byte) error {
 	writePath := filepath.Join(dir)
 	file := filepath.Join(writePath, name)
 
-	err := common.EnsureDir(writePath, 0700)
+	err := os2.EnsureDir(writePath, 0700)
 	if err != nil {
 		return err
 	}
 
-	err = common.WriteFile(file, contents, 0600)
+	err = os2.WriteFile(file, contents, 0600)
 	if err != nil {
 		return err
 	}
