@@ -13,6 +13,14 @@ const (
 	FDARC = "fdarc" // 10^-15 (femto)
 	ADARC = "adarc" // 10^-18 (atto)
 
+	KNSTL  = "knstl"  // 1 (base denom unit)
+	MKNSTL = "mknstl" // 10^-3 (milli)
+	UKNSTL = "uknstl" // 10^-6 (micro)
+	NKNSTL = "nknstl" // 10^-9 (nano)
+	PKNSTL = "pknstl" // 10^-12 (pico)
+	FKNSTL = "fknstl" // 10^-15 (femto)
+	AKNSTL = "aknstl" // 10^-18 (atto)
+
 	DefaultBondDenom      = UDARC
 	StakeDenom            = UDARC
 	DefaultConsensusPower = 100000
